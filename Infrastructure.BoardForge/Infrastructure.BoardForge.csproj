@@ -8,4 +8,14 @@
     <RootNamespace>DevStack.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\Migrations\" />
+    <Folder Include="Data\Repositories\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Application.Endpoint\Application.BoardForge.csproj" />
+    <ProjectReference Include="..\Domain.BoardForge\Domain.BoardForge.csproj" />
+  </ItemGroup>
+
 </Project>
