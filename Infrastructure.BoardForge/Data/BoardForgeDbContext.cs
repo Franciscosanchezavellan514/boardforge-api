@@ -43,7 +43,8 @@ public class BoardForgeDbContext : DbContext
                   .HasForeignKey(c => c.BoardId);
             entity.HasOne(e => e.Team)
                   .WithMany(t => t.Boards)
-                  .HasForeignKey(e => e.TeamId);
+                  .HasForeignKey(e => e.TeamId)
+                  .OnDelete(DeleteBehavior.NoAction);
         });
 
         modelBuilder.Entity<BoardColumn>(entity =>
@@ -62,10 +63,12 @@ public class BoardForgeDbContext : DbContext
             entity.HasKey(e => e.Id);
             entity.HasOne(e => e.Board)
                   .WithMany(b => b.Cards)
-                  .HasForeignKey(e => e.BoardId);
+                  .HasForeignKey(e => e.BoardId)
+                  .OnDelete(DeleteBehavior.NoAction);
             entity.HasOne(e => e.BoardColumn)
                   .WithMany(c => c.Cards)
-                  .HasForeignKey(e => e.BoardColumnId);
+                  .HasForeignKey(e => e.BoardColumnId)
+                  .OnDelete(DeleteBehavior.NoAction);
             entity.HasMany(e => e.Attachments)
                   .WithOne(a => a.Card)
                   .HasForeignKey(a => a.CardId);
@@ -77,7 +80,8 @@ public class BoardForgeDbContext : DbContext
                   .HasForeignKey(cl => cl.CardId);
             entity.HasOne(e => e.Owner)
                     .WithMany(u => u.AssignedCards)
-                    .HasForeignKey(e => e.OwnerId);
+                    .HasForeignKey(e => e.OwnerId)
+                    .OnDelete(DeleteBehavior.NoAction);
         });
 
         modelBuilder.Entity<CardAttachment>(entity =>
@@ -85,10 +89,12 @@ public class BoardForgeDbContext : DbContext
             entity.HasKey(e => e.Id);
             entity.HasOne(e => e.Card)
                   .WithMany(c => c.Attachments)
-                  .HasForeignKey(e => e.CardId);
+                  .HasForeignKey(e => e.CardId)
+                  .OnDelete(DeleteBehavior.NoAction);
             entity.HasOne(e => e.UploadedBy)
                   .WithMany(u => u.Attachments)
-                  .HasForeignKey(e => e.UploadedById);
+                  .HasForeignKey(e => e.UploadedById)
+                  .OnDelete(DeleteBehavior.NoAction);
         });
 
         modelBuilder.Entity<CardComment>(entity =>
@@ -96,10 +102,12 @@ public class BoardForgeDbContext : DbContext
             entity.HasKey(e => e.Id);
             entity.HasOne(e => e.Card)
                   .WithMany(c => c.Comments)
-                  .HasForeignKey(e => e.CardId);
+                  .HasForeignKey(e => e.CardId)
+                  .OnDelete(DeleteBehavior.NoAction);
             entity.HasOne(e => e.Author)
                   .WithMany(u => u.Comments)
-                  .HasForeignKey(e => e.AuthorId);
+                  .HasForeignKey(e => e.AuthorId)
+                  .OnDelete(DeleteBehavior.NoAction);
         });
 
         modelBuilder.Entity<Label>(entity =>
@@ -110,7 +118,8 @@ public class BoardForgeDbContext : DbContext
                   .HasForeignKey(cl => cl.LabelId);
             entity.HasOne(e => e.Team)
                   .WithMany(t => t.Labels)
-                  .HasForeignKey(e => e.TeamId);
+                  .HasForeignKey(e => e.TeamId)
+                  .OnDelete(DeleteBehavior.NoAction);
         });
 
         modelBuilder.Entity<CardLabel>(entity =>
@@ -119,10 +128,12 @@ public class BoardForgeDbContext : DbContext
             entity.HasIndex(e => new { e.CardId, e.LabelId }).IsUnique();
             entity.HasOne(e => e.Card)
                   .WithMany(c => c.Labels)
-                  .HasForeignKey(e => e.CardId);
+                  .HasForeignKey(e => e.CardId)
+                  .OnDelete(DeleteBehavior.NoAction);
             entity.HasOne(e => e.Label)
                   .WithMany(l => l.CardLabels)
-                  .HasForeignKey(e => e.LabelId);
+                  .HasForeignKey(e => e.LabelId)
+                  .OnDelete(DeleteBehavior.NoAction);
         });
 
         modelBuilder.Entity<Team>(entity =>
@@ -145,10 +156,12 @@ public class BoardForgeDbContext : DbContext
             entity.HasIndex(e => new { e.TeamId, e.UserId }).IsUnique();
             entity.HasOne(e => e.Team)
                   .WithMany(t => t.TeamMemberships)
-                  .HasForeignKey(e => e.TeamId);
+                  .HasForeignKey(e => e.TeamId)
+                  .OnDelete(DeleteBehavior.NoAction);
             entity.HasOne(e => e.User)
                   .WithMany(u => u.TeamMemberships)
-                  .HasForeignKey(e => e.UserId);
+                  .HasForeignKey(e => e.UserId)
+                  .OnDelete(DeleteBehavior.NoAction);
         });
     }
 }
