@@ -1,4 +1,6 @@
-﻿namespace DevStack.Domain.BoardForge.Entities;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace DevStack.Domain.BoardForge.Entities;
 
 public class BoardColumn
 {
