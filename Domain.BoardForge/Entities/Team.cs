@@ -9,4 +9,8 @@ public class Team : SoftDeletableEntity
 
     [MaxLength(500)]
     public string Description { get; set; } = string.Empty;
+
+    public ICollection<Board> Boards { get; set; } = [];
+    public ICollection<TeamMembership> TeamMemberships { get; set; } = [];
+    public ICollection<Label> Labels { get; set; } = [];
 }
