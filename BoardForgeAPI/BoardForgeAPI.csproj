@@ -10,4 +10,10 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Application.Endpoint\Application.BoardForge.csproj" />
+    <ProjectReference Include="..\Domain.BoardForge\Domain.BoardForge.csproj" />
+    <ProjectReference Include="..\Infrastructure.BoardForge\Infrastructure.BoardForge.csproj" />
+  </ItemGroup>
+
 </Project>

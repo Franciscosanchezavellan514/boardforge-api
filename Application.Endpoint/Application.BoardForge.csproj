@@ -8,4 +8,8 @@
     <AssemblyName>DevStack.$(MSBuildProjectName)</AssemblyName>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Domain.BoardForge\Domain.BoardForge.csproj" />
+  </ItemGroup>
+
 </Project>
