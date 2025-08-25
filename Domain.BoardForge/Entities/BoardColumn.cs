@@ -2,7 +2,7 @@
 
 namespace DevStack.Domain.BoardForge.Entities;
 
-public class BoardColumn
+public class BoardColumn : AuditableEntity
 {
     [Required, MaxLength(100)]
     public string Name { get; set; } = string.Empty;
