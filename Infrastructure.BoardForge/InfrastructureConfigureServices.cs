@@ -7,7 +7,7 @@ namespace DevStack.Infrastructure.BoardForge;
 
 public static partial class InfrastructureConfigureServices
 {
-    public static IServiceCollection AddBoardForgeInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
         // Migrations output directory: /Infrastructure.BoardForge/Data/Migrations
         services.AddDbContext<BoardForgeDbContext>(options =>
