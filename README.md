@@ -53,3 +53,17 @@ By working through this project, students learn:
       {"id": "T2", "role": "Viewer"}
     ]
   }
+
+---
+### Migrations
+
+### Add new migration
+Replace `{{MigrationName}}` with the new migration name.
+```bash
+dotnet ef --startup-project .\BoardForgeAPI\ migrations add {{MigrationName}} --project .\Infrastructure.BoardForge -o Data/Migrations
+```
+
+### Update database
+```bash
+dotnet ef --startup-project .\BoardForgeAPI\ database update --project .\Infrastructure.BoardForge
+```
