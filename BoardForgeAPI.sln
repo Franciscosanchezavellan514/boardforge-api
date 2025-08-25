@@ -5,6 +5,20 @@ VisualStudioVersion = 17.11.35312.102
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoardForgeAPI", "BoardForgeAPI\BoardForgeAPI.csproj", "{2068CC6D-DCA1-4504-8461-7180BEBC22E0}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2. Application", "2. Application", "{09EDAA1D-5F8B-4702-A72C-9C6E659231B2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3. Domain", "3. Domain", "{5C472484-AD91-4FDB-908A-121508243380}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4. Infrastructure", "4. Infrastructure", "{1D22102B-A7FC-4770-863A-D3BEEB1095CD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1. Presentation", "1. Presentation", "{7696D75A-E443-400A-866B-C7A463BFDC2A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application.BoardForge", "Application.Endpoint\Application.BoardForge.csproj", "{2EBC1DBC-CDC1-4E6D-A25F-093C71C0E55F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain.BoardForge", "Domain.BoardForge\Domain.BoardForge.csproj", "{6105959C-81F5-4A80-863E-4A0E092773D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure.BoardForge", "Infrastructure.BoardForge\Infrastructure.BoardForge.csproj", "{D2E0538B-E4EE-4987-9510-324EFD3F5F7A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,9 +29,27 @@ Global
 		{2068CC6D-DCA1-4504-8461-7180BEBC22E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2068CC6D-DCA1-4504-8461-7180BEBC22E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2068CC6D-DCA1-4504-8461-7180BEBC22E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2EBC1DBC-CDC1-4E6D-A25F-093C71C0E55F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2EBC1DBC-CDC1-4E6D-A25F-093C71C0E55F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2EBC1DBC-CDC1-4E6D-A25F-093C71C0E55F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2EBC1DBC-CDC1-4E6D-A25F-093C71C0E55F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6105959C-81F5-4A80-863E-4A0E092773D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6105959C-81F5-4A80-863E-4A0E092773D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6105959C-81F5-4A80-863E-4A0E092773D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6105959C-81F5-4A80-863E-4A0E092773D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2E0538B-E4EE-4987-9510-324EFD3F5F7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2E0538B-E4EE-4987-9510-324EFD3F5F7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2E0538B-E4EE-4987-9510-324EFD3F5F7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2E0538B-E4EE-4987-9510-324EFD3F5F7A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2068CC6D-DCA1-4504-8461-7180BEBC22E0} = {7696D75A-E443-400A-866B-C7A463BFDC2A}
+		{2EBC1DBC-CDC1-4E6D-A25F-093C71C0E55F} = {09EDAA1D-5F8B-4702-A72C-9C6E659231B2}
+		{6105959C-81F5-4A80-863E-4A0E092773D8} = {5C472484-AD91-4FDB-908A-121508243380}
+		{D2E0538B-E4EE-4987-9510-324EFD3F5F7A} = {1D22102B-A7FC-4770-863A-D3BEEB1095CD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {215D2035-549E-456F-9BF5-53E1F2472E8E}
