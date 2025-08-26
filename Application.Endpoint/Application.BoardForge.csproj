@@ -12,4 +12,9 @@
     <ProjectReference Include="..\Domain.BoardForge\Domain.BoardForge.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="DTOs\" />
+    <Folder Include="Services\" />
+  </ItemGroup>
+
 </Project>
