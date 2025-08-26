@@ -18,4 +18,5 @@ public class User : SoftDeletableEntity
     public ICollection<CardComment> Comments { get; set; } = [];
     public ICollection<CardAttachment> Attachments { get; set; } = [];
     public ICollection<Board> OwnedBoards { get; set; } = [];
+    public ICollection<RefreshToken> RefreshTokens { get; set; } = [];
 }

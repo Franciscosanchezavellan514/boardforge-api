@@ -15,11 +15,12 @@ public class BoardForgeDbContext : DbContext
     public DbSet<Label> Labels { get; set; }
     public DbSet<Team> Teams { get; set; }
     public DbSet<TeamMembership> TeamMemberships { get; set; }
+	public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     public BoardForgeDbContext(DbContextOptions<BoardForgeDbContext> options)
-        : base(options)
-    {
-    }
+		: base(options)
+	{
+	}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -31,6 +32,20 @@ public class BoardForgeDbContext : DbContext
             // Ensure email is unique to prevent duplicate user accounts and support user identification.
             entity.HasIndex(e => e.Email).IsUnique();
         });
+
+		modelBuilder.Entity<RefreshToken>(entity =>
+		{
+			entity.HasKey(e => e.Id);
+			entity.HasIndex(e => e.TokenHash).IsUnique();
+			entity.Property(e => e.TokenHash).HasMaxLength(256).IsRequired();
+			entity.Property(e => e.CreatedByIp).HasMaxLength(64);
+			entity.Property(e => e.UserAgent).HasMaxLength(512);
+			entity.Property(e => e.DeviceName).HasMaxLength(128);
+			entity.HasOne(e => e.User)
+				  .WithMany(u => u.RefreshTokens)
+				  .HasForeignKey(e => e.UserId)
+				  .OnDelete(DeleteBehavior.Cascade);
+		});
 
         modelBuilder.Entity<Board>(entity =>
         {
