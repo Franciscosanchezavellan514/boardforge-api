@@ -41,12 +41,12 @@ public class TokenService(IOptions<JwtOptions> jwtOptions) : ITokenService
     {
         var bytes = RandomNumberGenerator.GetBytes(64);
         var rawToken = Convert.ToBase64String(bytes);
-        var hashedToken = SHA256.HashData(Encoding.UTF8.GetBytes(rawToken));
+        var hashedToken = ComputeHash(rawToken);
         return new RefreshTokenGeneratedDTO
         {
             RawToken = rawToken,
             ExpiresAtUtc = DateTime.UtcNow.AddDays(jwtOptions.RefreshTokenDays),
-            HashedToken = Convert.ToBase64String(hashedToken)
+            HashedToken = hashedToken
         };
     }
 
