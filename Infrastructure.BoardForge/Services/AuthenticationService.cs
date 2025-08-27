@@ -1,5 +1,6 @@
 ﻿using DevStack.Application.BoardForge.DTOs.Response;
 using DevStack.Application.BoardForge.Interfaces;
+using DevStack.Application.Endpoint.DTOs.Request;
 using DevStack.Application.Endpoint.Interfaces;
 using DevStack.Domain.BoardForge.Entities;
 using DevStack.Domain.BoardForge.Interfaces.Repositories;
@@ -13,8 +14,11 @@ public class AuthenticationService(IUnitOfWork unitOfWork, ITokenService tokenSe
     private readonly ITokenService _tokenService = tokenService;
     private readonly IPasswordHasher _passwordHasher = passwordHasher;
 
-    public async Task<TokenResponseDTO> AuthenticateAsync(string email, string password)
+    public async Task<TokenResponseDTO> AuthenticateAsync(AuthenticateUserDTO request)
     {
+        string email = request.Email;
+        string password = request.Password;
+
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             throw new ArgumentException("Email and password must be provided.");
 
@@ -30,9 +34,9 @@ public class AuthenticationService(IUnitOfWork unitOfWork, ITokenService tokenSe
         {
             TokenHash = refreshTokenDto.HashedToken,
             UserId = user.Id,
-            CreatedByIp = "127.0.0.1", // This should be replaced with the actual IP address
-            UserAgent = "Unknown", // This should be replaced with the actual user agent
-            DeviceName = "Unknown", // This should be replaced with the actual device name
+            CreatedByIp = request.IpAddress,
+            UserAgent = request.UserAgent,
+            DeviceName = request.DeviceName,
             ExpiresAtUtc = refreshTokenDto.ExpiresAtUtc,
             CreatedAtUtc = DateTime.UtcNow,
         };
