@@ -7,5 +7,5 @@ public interface IAuthenticationService
 {
     Task<TokenResponseDTO> AuthenticateAsync(AuthenticateUserRequest request);
     Task<UserResponse> RegisterAsync(AuthenticateUserRequest request);
-    Task<TokenResponseDTO> RefreshTokenAsync(RefreshTokenRequest request);
+    Task<TokenResponseDTO> RefreshTokenAsync(RefreshTokenDetailRequest request);
 }
