@@ -53,6 +53,53 @@ public class AuthenticationService(IUnitOfWork unitOfWork, ITokenService tokenSe
         };
     }
 
+    public async Task<TokenResponseDTO> RefreshTokenAsync(RefreshTokenRequest request)
+    {
+        var hashedToken = _tokenService.ComputeHash(request.RefreshToken);
+        var existingToken = await _unitOfWork.RefreshTokens.GetByTokenAsync(hashedToken);
+        if (existingToken == null)
+        {
+            throw new UnauthorizedAccessException("Invalid refresh token.");
+        }
+
+        if (existingToken.IsRevoked || existingToken.ExpiresAtUtc <= DateTime.UtcNow)
+        {
+            throw new UnauthorizedAccessException("Refresh token is expired or revoked.");
+        }
+
+        var user = await _unitOfWork.Users.GetByIdAsync(existingToken.UserId);
+        if (user == null)
+        {
+            throw new UnauthorizedAccessException("User not found.");
+        }
+
+        (string token, DateTime expiresAtUtc) = _tokenService.GenerateToken(user);
+        RefreshTokenGeneratedDTO newRefreshTokenDto = _tokenService.GenerateRefreshToken();
+        RefreshToken newRefreshToken = new()
+        {
+            TokenHash = newRefreshTokenDto.HashedToken,
+            UserId = user.Id,
+            CreatedByIp = request.IpAddress,
+            UserAgent = request.UserAgent,
+            DeviceName = request.DeviceName,
+            ExpiresAtUtc = newRefreshTokenDto.ExpiresAtUtc,
+            CreatedAtUtc = DateTime.UtcNow,
+        };
+
+        existingToken.RevokedAtUtc = DateTime.UtcNow;
+        await _unitOfWork.RefreshTokens.UpdateAsync(existingToken);
+        await _unitOfWork.RefreshTokens.AddAsync(newRefreshToken);
+        await _unitOfWork.SaveChangesAsync();
+
+        return new TokenResponseDTO
+        {
+            Token = token,
+            TokenExpiresIn = expiresAtUtc,
+            RefreshToken = newRefreshTokenDto.RawToken,
+            RefreshTokenExpiresIn = newRefreshTokenDto.ExpiresAtUtc
+        };
+    }
+
     public async Task<UserResponse> RegisterAsync(AuthenticateUserRequest request)
     {
         string email = request.Email;
