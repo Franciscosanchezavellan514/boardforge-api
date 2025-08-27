@@ -58,4 +58,14 @@ public class EfRepository<TEntity> : IAsyncRepository<TEntity> where TEntity : B
         _dbContext.Set<TEntity>().UpdateRange(entities);
         return Task.FromResult(entities);
     }
+
+    public async Task<int> SaveChangesAsync()
+    {
+        return await _dbContext.SaveChangesAsync();
+    }
+
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken)
+    {
+        return _dbContext.SaveChangesAsync(cancellationToken);
+    }
 }
