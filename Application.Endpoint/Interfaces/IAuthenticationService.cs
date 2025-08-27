@@ -5,5 +5,5 @@ namespace DevStack.Application.BoardForge.Interfaces;
 
 public interface IAuthenticationService
 {
-    Task<TokenResponseDTO> AuthenticateAsync(AuthenticateUserDTO request);
+    Task<TokenResponseDTO> AuthenticateAsync(AuthenticateUserRequest request);
 }

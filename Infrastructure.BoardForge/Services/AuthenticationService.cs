@@ -14,7 +14,7 @@ public class AuthenticationService(IUnitOfWork unitOfWork, ITokenService tokenSe
     private readonly ITokenService _tokenService = tokenService;
     private readonly IPasswordHasher _passwordHasher = passwordHasher;
 
-    public async Task<TokenResponseDTO> AuthenticateAsync(AuthenticateUserDTO request)
+    public async Task<TokenResponseDTO> AuthenticateAsync(AuthenticateUserRequest request)
     {
         string email = request.Email;
         string password = request.Password;
