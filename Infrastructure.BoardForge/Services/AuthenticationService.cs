@@ -47,7 +47,9 @@ public class AuthenticationService(IUnitOfWork unitOfWork, ITokenService tokenSe
         return new TokenResponseDTO
         {
             Token = token,
-            ExpiresIn = expiresAtUtc
+            TokenExpiresIn = expiresAtUtc,
+            RefreshToken = refreshTokenDto.RawToken,
+            RefreshTokenExpiresIn = refreshTokenDto.ExpiresAtUtc
         };
     }
 
