@@ -6,7 +6,7 @@ public interface IAsyncRepository<TEntity> where TEntity : BaseEntity
 {
     // TODO: Implement Specification Pattern
     // IQueryable<TEntity> ApplySpecification(ISpecification<TEntity> spec);
-    Task<TEntity> GetByIdAsync(int id);
+    Task<TEntity?> GetByIdAsync(int id);
     Task<IReadOnlyList<TEntity>> ListAllAsync();
     // Task<IReadOnlyList<TEntity>> ListAsync(ISpecification<TEntity> spec);
     Task<TEntity> AddAsync(TEntity entity);

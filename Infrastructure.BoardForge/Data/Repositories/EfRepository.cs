@@ -1,47 +1,61 @@
 using DevStack.Domain.BoardForge.Entities;
 using DevStack.Domain.BoardForge.Interfaces.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace DevStack.Infrastructure.BoardForge.Data.Repositories;
 
 public class EfRepository<TEntity> : IAsyncRepository<TEntity> where TEntity : BaseEntity
 {
-    public Task<TEntity> AddAsync(TEntity entity)
+    private readonly BoardForgeDbContext _dbContext;
+
+    public EfRepository(BoardForgeDbContext dbContext)
     {
-        throw new NotImplementedException();
+        _dbContext = dbContext;
     }
 
-    public Task<List<TEntity>> AddAsync(List<TEntity> entity)
+    public async Task<TEntity> AddAsync(TEntity entity)
     {
-        throw new NotImplementedException();
+        await _dbContext.Set<TEntity>().AddAsync(entity);
+        return entity;
+    }
+
+    public async Task<List<TEntity>> AddAsync(List<TEntity> entities)
+    {
+        await _dbContext.Set<TEntity>().AddRangeAsync(entities);
+        return entities;
     }
 
     public Task DeleteAsync(TEntity entity)
     {
-        throw new NotImplementedException();
+        _dbContext.Set<TEntity>().Remove(entity);
+        return Task.CompletedTask;
     }
 
-    public Task<List<TEntity>> DeleteAsync(List<TEntity> entity)
+    public Task<List<TEntity>> DeleteAsync(List<TEntity> entities)
     {
-        throw new NotImplementedException();
+        _dbContext.Set<TEntity>().RemoveRange(entities);
+        return Task.FromResult(entities);
     }
 
-    public Task<TEntity> GetByIdAsync(int id)
+    public async Task<TEntity?> GetByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        return await _dbContext.Set<TEntity>().FindAsync(id);
     }
 
-    public Task<IReadOnlyList<TEntity>> ListAllAsync()
+    public async Task<IReadOnlyList<TEntity>> ListAllAsync()
     {
-        throw new NotImplementedException();
+        return await _dbContext.Set<TEntity>().ToListAsync();
     }
 
     public Task UpdateAsync(TEntity entity)
     {
-        throw new NotImplementedException();
+        _dbContext.Set<TEntity>().Update(entity);
+        return Task.CompletedTask;
     }
 
-    public Task<List<TEntity>> UpdateAsync(List<TEntity> entity)
+    public Task<List<TEntity>> UpdateAsync(List<TEntity> entities)
     {
-        throw new NotImplementedException();
+        _dbContext.Set<TEntity>().UpdateRange(entities);
+        return Task.FromResult(entities);
     }
 }
