@@ -50,4 +50,41 @@ public class AuthenticationService(IUnitOfWork unitOfWork, ITokenService tokenSe
             ExpiresIn = expiresAtUtc
         };
     }
+
+    public async Task<UserResponse> RegisterAsync(AuthenticateUserRequest request)
+    {
+        string email = request.Email;
+        string password = request.Password;
+
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+            throw new ArgumentException("Email and password must be provided.");
+
+        var existingUser = await _unitOfWork.Users.GetByEmailAsync(email);
+        if (existingUser != null) throw new InvalidOperationException("A user with this email already exists.");
+
+        (string hashedPassword, byte[] salt) = _passwordHasher.HashPassword(password);
+
+        User newUser = new()
+        {
+            Email = email,
+            PasswordHash = hashedPassword,
+            DisplayName = email.Split('@')[0],
+            Salt = Convert.ToBase64String(salt),
+            CreatedAt = DateTime.UtcNow,
+            IsActive = true,
+            EmailConfirmed = false,
+        };
+
+        await _unitOfWork.Users.AddAsync(newUser);
+        await _unitOfWork.SaveChangesAsync();
+
+        return new UserResponse
+        {
+            Id = newUser.Id,
+            DisplayName = newUser.DisplayName,
+            Email = newUser.Email,
+            EmailConfirmed = newUser.EmailConfirmed,
+            CreatedAt = newUser.CreatedAt,
+        };
+    }
 }
