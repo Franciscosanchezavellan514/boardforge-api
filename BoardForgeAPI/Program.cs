@@ -1,4 +1,5 @@
 using DevStack.BoardForgeAPI.Extensions;
+using DevStack.BoardForgeAPI.Middlewares;
 using DevStack.Infrastructure.BoardForge;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +22,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 
