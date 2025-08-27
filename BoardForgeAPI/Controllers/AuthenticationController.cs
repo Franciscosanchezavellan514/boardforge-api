@@ -39,7 +39,7 @@ public class AuthenticationController : ControllerBase
     }
 
     [HttpPost("register")]
-    [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(TokenResponseDTO))]
+    [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(UserResponse))]
     public async Task<IActionResult> Register([FromBody] UserRequest request)
     {
         var authRequest = AuthRequestBuilder.Instance(HttpContext).BuildAuthenticateUserRequest(request);
