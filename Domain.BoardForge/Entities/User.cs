@@ -8,6 +8,8 @@ public class User : SoftDeletableEntity
     public string Email { get; set; } = string.Empty;
     [Required]
     public string PasswordHash { get; set; } = string.Empty;
+    [Required]
+    public string Salt { get; set; } = string.Empty;
     [Required, MaxLength(100)]
     public string DisplayName { get; set; } = string.Empty;
     public bool EmailConfirmed { get; set; } = false;
