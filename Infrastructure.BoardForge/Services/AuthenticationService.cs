@@ -24,7 +24,7 @@ public class AuthenticationService(IUnitOfWork unitOfWork, ITokenService tokenSe
             throw new ArgumentException("Email and password must be provided.");
 
         var user = await _unitOfWork.Users.GetByEmailAsync(email);
-        if (user == null || !_passwordHasher.VerifyHashedPassword(password, user.PasswordHash, Convert.FromBase64String(user.Salt)))
+        if (user == null || !_passwordHasher.VerifyHashedPassword(user.PasswordHash, password, Convert.FromBase64String(user.Salt)))
         {
             throw new UnauthorizedAccessException("Invalid email or password.");
         }
