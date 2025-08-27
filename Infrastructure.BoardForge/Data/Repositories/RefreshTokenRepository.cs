@@ -31,4 +31,10 @@ public class RefreshTokenRepository : IRefreshTokenRepository
             _dbContext.Set<RefreshToken>().Remove(refreshToken);
         }
     }
+
+    public Task UpdateAsync(RefreshToken existingToken)
+    {
+        _dbContext.Set<RefreshToken>().Update(existingToken);
+        return Task.CompletedTask;
+    }
 }
