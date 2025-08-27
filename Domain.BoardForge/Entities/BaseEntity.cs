@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace DevStack.Domain.BoardForge.Entities;
 
@@ -6,6 +7,7 @@ public abstract class BaseEntity
 {
     [Key]
     public int Id { get; set; }
+    [DefaultValue(true)]
     public bool IsActive { get; set; }
 }
 
