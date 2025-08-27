@@ -53,7 +53,7 @@ public class AuthenticationService(IUnitOfWork unitOfWork, ITokenService tokenSe
         };
     }
 
-    public async Task<TokenResponseDTO> RefreshTokenAsync(RefreshTokenRequest request)
+    public async Task<TokenResponseDTO> RefreshTokenAsync(RefreshTokenDetailRequest request)
     {
         var hashedToken = _tokenService.ComputeHash(request.RefreshToken);
         var existingToken = await _unitOfWork.RefreshTokens.GetByTokenAsync(hashedToken);
