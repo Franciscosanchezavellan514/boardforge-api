@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using DevStack.Infrastructure.BoardForge.Models;
 using DevStack.Application.Endpoint.Interfaces;
 using DevStack.Infrastructure.BoardForge.Services;
+using DevStack.Infrastructure.BoardForge.Interfaces;
+using DevStack.Application.BoardForge.Interfaces;
 
 namespace DevStack.Infrastructure.BoardForge;
 
@@ -20,6 +22,8 @@ public static partial class InfrastructureConfigureServices
 
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IPasswordHasher, PasswordHasherService>();
+        services.AddScoped<IAuthenticationService, AuthenticationService>();
 
         return services;
     }
