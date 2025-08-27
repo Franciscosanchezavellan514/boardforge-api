@@ -3,6 +3,7 @@ using DevStack.Application.BoardForge.Interfaces;
 using DevStack.Application.Endpoint.DTOs.Request;
 using DevStack.Application.Endpoint.Interfaces;
 using DevStack.Domain.BoardForge.Entities;
+using DevStack.Domain.BoardForge.Exceptions;
 using DevStack.Domain.BoardForge.Interfaces.Repositories;
 using DevStack.Infrastructure.BoardForge.Interfaces;
 
@@ -70,7 +71,7 @@ public class AuthenticationService(IUnitOfWork unitOfWork, ITokenService tokenSe
         var user = await _unitOfWork.Users.GetByIdAsync(existingToken.UserId);
         if (user == null)
         {
-            throw new UnauthorizedAccessException("User not found.");
+            throw new EntityNotFoundException("User not found.");
         }
 
         (string token, DateTime expiresAtUtc) = _tokenService.GenerateToken(user);
