@@ -94,9 +94,13 @@ public class BoardForgeDbContext : DbContext
                   .WithOne(cl => cl.Card)
                   .HasForeignKey(cl => cl.CardId);
             entity.HasOne(e => e.Owner)
-                    .WithMany(u => u.AssignedCards)
-                    .HasForeignKey(e => e.OwnerId)
-                    .OnDelete(DeleteBehavior.NoAction);
+                  .WithMany(u => u.AssignedCards)
+                  .HasForeignKey(e => e.OwnerId)
+                  .OnDelete(DeleteBehavior.NoAction);
+            entity.HasOne(e => e.Team)
+                  .WithMany(t => t.Cards)
+                  .HasForeignKey(e => e.TeamId)
+                  .OnDelete(DeleteBehavior.NoAction);
         });
 
         modelBuilder.Entity<CardAttachment>(entity =>
@@ -118,7 +122,7 @@ public class BoardForgeDbContext : DbContext
             entity.HasOne(e => e.Card)
                   .WithMany(c => c.Comments)
                   .HasForeignKey(e => e.CardId)
-                  .OnDelete(DeleteBehavior.NoAction);
+                  .OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(e => e.Author)
                   .WithMany(u => u.Comments)
                   .HasForeignKey(e => e.AuthorId)
@@ -134,7 +138,7 @@ public class BoardForgeDbContext : DbContext
             entity.HasOne(e => e.Team)
                   .WithMany(t => t.Labels)
                   .HasForeignKey(e => e.TeamId)
-                  .OnDelete(DeleteBehavior.NoAction);
+                  .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<CardLabel>(entity =>
@@ -144,11 +148,11 @@ public class BoardForgeDbContext : DbContext
             entity.HasOne(e => e.Card)
                   .WithMany(c => c.Labels)
                   .HasForeignKey(e => e.CardId)
-                  .OnDelete(DeleteBehavior.NoAction);
+                  .OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(e => e.Label)
                   .WithMany(l => l.CardLabels)
                   .HasForeignKey(e => e.LabelId)
-                  .OnDelete(DeleteBehavior.NoAction);
+                  .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Team>(entity =>
@@ -163,6 +167,9 @@ public class BoardForgeDbContext : DbContext
             entity.HasMany(e => e.Labels)
                   .WithOne(l => l.Team)
                   .HasForeignKey(l => l.TeamId);
+            entity.HasMany(e => e.Cards)
+                  .WithOne(c => c.Team)
+                  .HasForeignKey(e => e.TeamId);
         });
 
         modelBuilder.Entity<TeamMembership>(entity =>
@@ -172,11 +179,11 @@ public class BoardForgeDbContext : DbContext
             entity.HasOne(e => e.Team)
                   .WithMany(t => t.TeamMemberships)
                   .HasForeignKey(e => e.TeamId)
-                  .OnDelete(DeleteBehavior.NoAction);
+                  .OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(e => e.User)
                   .WithMany(u => u.TeamMemberships)
                   .HasForeignKey(e => e.UserId)
-                  .OnDelete(DeleteBehavior.NoAction);
+                  .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

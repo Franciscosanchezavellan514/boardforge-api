@@ -19,4 +19,5 @@ public class Team : SoftDeletableEntity
     public ICollection<Board> Boards { get; set; } = [];
     public ICollection<TeamMembership> TeamMemberships { get; set; } = [];
     public ICollection<Label> Labels { get; set; } = [];
+    public ICollection<Card> Cards { get; set; } = [];
 }
