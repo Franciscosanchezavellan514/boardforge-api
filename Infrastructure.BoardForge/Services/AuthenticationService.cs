@@ -23,7 +23,7 @@ public class AuthenticationService(IUnitOfWork unitOfWork, ITokenService tokenSe
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             throw new ArgumentException("Email and password must be provided.");
 
-        var user = await _unitOfWork.Users.GetByEmailAsync(email);
+        var user = await _unitOfWork.Users.GetByEmailAsync(email.ToLower().Trim());
         if (user == null || !_passwordHasher.VerifyHashedPassword(user.PasswordHash, password, Convert.FromBase64String(user.Salt)))
         {
             throw new UnauthorizedAccessException("Invalid email or password.");
@@ -116,9 +116,9 @@ public class AuthenticationService(IUnitOfWork unitOfWork, ITokenService tokenSe
 
         User newUser = new()
         {
-            Email = email,
+            Email = email.ToLower().Trim(),
             PasswordHash = hashedPassword,
-            DisplayName = email.Split('@')[0],
+            DisplayName = email.Split('@')[0].ToLower().Trim(),
             Salt = Convert.ToBase64String(salt),
             CreatedAt = DateTime.UtcNow,
             IsActive = true,
