@@ -2,6 +2,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DevStack.Domain.BoardForge.Entities;
 
+public interface ITeamResource
+{
+    public int TeamId { get; set; }
+    public Team? Team { get; set; }
+}
+
 public class Team : SoftDeletableEntity
 {
     [Required, MaxLength(150)]

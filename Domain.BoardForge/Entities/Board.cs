@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DevStack.Domain.BoardForge.Entities;
 
-public class Board : SoftDeletableEntity
+public class Board : SoftDeletableEntity, ITeamResource
 {
     [Required, MaxLength(150)]
     public string Title { get; set; } = string.Empty;

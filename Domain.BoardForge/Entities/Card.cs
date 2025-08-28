@@ -2,7 +2,7 @@
 
 namespace DevStack.Domain.BoardForge.Entities;
 
-public class Card : VersionedEntity
+public class Card : VersionedEntity, ITeamResource
 {
     [Required, MaxLength(200)]
     public string Title { get; set; } = string.Empty;
@@ -11,9 +11,12 @@ public class Card : VersionedEntity
     [Required]
     public int Order { get; set; }
 
-    [Required]
-    public int BoardColumnId { get; set; }
+    public int? BoardColumnId { get; set; }
     public BoardColumn? BoardColumn { get; set; }
+
+    [Required]
+    public int TeamId { get; set; }
+    public Team? Team { get; set; }
 
     [Required]
     public int BoardId { get; set; }

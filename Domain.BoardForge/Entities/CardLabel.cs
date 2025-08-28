@@ -2,7 +2,7 @@
 
 namespace DevStack.Domain.BoardForge.Entities;
 
-public class CardLabel : SoftDeletableEntity
+public class CardLabel : BaseEntity
 {
     [Required]
     public int CardId { get; set; }

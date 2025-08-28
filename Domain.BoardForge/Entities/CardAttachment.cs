@@ -2,7 +2,7 @@
 
 namespace DevStack.Domain.BoardForge.Entities;
 
-public class CardAttachment : BaseEntity
+public class CardAttachment : BaseEntity, ITeamResource
 {
     [Required, MaxLength(255)]
     public string FileName { get; set; } = string.Empty;
@@ -15,6 +15,10 @@ public class CardAttachment : BaseEntity
     [Required]
     public int CardId { get; set; }
     public Card? Card { get; set; }
+
+    [Required]
+    public int TeamId { get; set; }
+    public Team? Team { get; set; }
 
     [Required]
     public int UploadedById { get; set; }
