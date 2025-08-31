@@ -44,7 +44,7 @@ public class EfRepository<TEntity> : IAsyncRepository<TEntity> where TEntity : B
 
     public async Task<IReadOnlyList<TEntity>> ListAllAsync()
     {
-        return await _dbContext.Set<TEntity>().ToListAsync();
+        return await _dbContext.Set<TEntity>().Where(e => e.IsActive).ToListAsync();
     }
 
     public Task UpdateAsync(TEntity entity)
