@@ -23,9 +23,12 @@ public static partial class InfrastructureConfigureServices
                 sqlOptions => sqlOptions.MigrationsAssembly(typeof(BoardForgeDbContext).Assembly.FullName)));
 
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+
+        // Infrastructure Services
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IPasswordHasher, PasswordHasherService>();
         services.AddScoped<IAuthenticationService, AuthenticationService>();
+        services.AddScoped<ITeamAuthorizationService, TeamAuthorizationService>();
 
         // Unit of Work & Repositories
         services.AddScoped<IUnitOfWork, UnitOfWork>();
