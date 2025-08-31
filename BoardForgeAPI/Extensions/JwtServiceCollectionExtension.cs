@@ -1,6 +1,7 @@
 using System.Text;
 using DevStack.Infrastructure.BoardForge.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 
 namespace DevStack.BoardForgeAPI.Extensions;
@@ -39,6 +40,14 @@ public static class JwtServiceCollectionExtension
                 ValidateAudience = true
             };
         });
+
+        services.AddAuthorizationBuilder()
+            .SetDefaultPolicy(
+                new AuthorizationPolicyBuilder()
+                    .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+                    .RequireAuthenticatedUser()
+                    .Build()
+            );
 
         return services;
     }
