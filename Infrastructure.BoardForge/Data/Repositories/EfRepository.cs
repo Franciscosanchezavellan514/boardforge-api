@@ -1,4 +1,5 @@
 using DevStack.Domain.BoardForge.Entities;
+using DevStack.Domain.BoardForge.Interfaces;
 using DevStack.Domain.BoardForge.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -67,5 +68,21 @@ public class EfRepository<TEntity> : IAsyncRepository<TEntity> where TEntity : B
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
         return _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<TEntity>> ListAsync(ISpecification<TEntity> spec)
+    {
+        return await ApplySpecification(spec).ToListAsync();
+    }
+
+    public async Task<int> CountAsync(ISpecification<TEntity> spec)
+    {
+        return await ApplySpecification(spec).CountAsync();
+    }
+
+    public IQueryable<TEntity> ApplySpecification(ISpecification<TEntity> spec)
+    {
+        IQueryable<TEntity> query = SpecificationEvaluator<TEntity>.GetQuery(_dbContext.Set<TEntity>().AsQueryable(), spec);
+        return query;
     }
 }
