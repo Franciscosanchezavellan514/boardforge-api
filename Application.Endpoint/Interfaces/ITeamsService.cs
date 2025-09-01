@@ -5,6 +5,7 @@ namespace DevStack.Application.BoardForge.Interfaces;
 
 public interface ITeamsService
 {
+    Task<TeamResponse> GetByIdAsync(int id);
     Task<IEnumerable<TeamResponse>> ListMyTeamsAsync(int userId);
     Task<TeamResponse> CreateAsync(BaseRequest<CreateTeamRequest> request);
     Task<TeamResponse> UpdateAsync(BaseRequest<UpdateTeamRequest> request);

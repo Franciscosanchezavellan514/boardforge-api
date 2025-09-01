@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using DevStack.Application.BoardForge.DTOs.Request;
 using DevStack.Application.BoardForge.DTOs.Response;
 using DevStack.Application.BoardForge.Interfaces;
@@ -55,6 +56,20 @@ public class TeamsService(IUnitOfWork unitOfWork) : ITeamsService
         await _unitOfWork.SaveChangesAsync();
 
         return new TeamResponse(newTeam.Id, newTeam.Name, newTeam.Description, newTeam.TeamMemberships.Count);
+    }
+
+    public async Task<TeamResponse> GetByIdAsync(int id)
+    {
+        Team? team = await _unitOfWork.Teams.GetByIdAsync(id);
+        if (team is null) throw new EntityNotFoundException($"Team with ID {id} not found");
+
+        TeamResponse response = new(
+            team.Id,
+            team.Name,
+            team.Description,
+            team.TeamMemberships.Count
+        );
+        return response;
     }
 
     public async Task<IEnumerable<TeamResponse>> ListMyTeamsAsync(int userId)
