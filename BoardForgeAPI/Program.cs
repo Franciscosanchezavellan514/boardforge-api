@@ -3,6 +3,7 @@ using DevStack.BoardForgeAPI.Extensions;
 using DevStack.BoardForgeAPI.Middlewares;
 using DevStack.Infrastructure.BoardForge;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +22,7 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
-builder.Services.AddSingleton<IAuthorizationHandler, TeamRoleAuthorizationHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, TeamRoleAuthorizationHandler>();
 
 var app = builder.Build();
 
