@@ -29,6 +29,9 @@ public class DatabaseSeeder : IDatabaseSeeder
 
     private async Task SeedUserAsync()
     {
+        // If users already exist, skip seeding.
+        if (await _context.Users.AnyAsync()) return;
+
         var requests = new List<UserRequest>
         {
             new() { Email = "itachi.uchiha@devstack.com", Password = "UchihaClan123!" },
