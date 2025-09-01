@@ -1,6 +1,8 @@
 ﻿using System.Security.Claims;
+using DevStack.Application.BoardForge.DTOs.Request;
 using DevStack.Application.BoardForge.DTOs.Response;
 using DevStack.Application.BoardForge.Interfaces;
+using DevStack.BoardForgeAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,43 +13,49 @@ namespace DevStack.BoardForgeAPI.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
-public class TeamsController(ITeamsService teamsService) : ControllerBase
+public class TeamsController(ITeamsService teamsService) : BaseApiController
 {
     private readonly ITeamsService _teamsService = teamsService;
 
-    // GET: api/<TeamsController>
     [HttpGet]
     [Route("my-teams")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<TeamResponse>))]
-    public async Task<IEnumerable<TeamResponse>> GetMyTeamsAsync()
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(HttpErrorResponse))]
+    public async Task<IActionResult> GetMyTeamsAsync()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId == null || !int.TryParse(userId, out int userIdInt))
-        {
-            return Array.Empty<TeamResponse>();
-        }
-
-        return await _teamsService.ListMyTeamsAsync(userIdInt);
+        var teams = await _teamsService.ListMyTeamsAsync(CurrentUserId);
+        return Ok(teams);
     }
 
-    // // GET api/<TeamsController>/5
-    // [HttpGet("{id}")]
-    // public string Get(int id)
-    // {
-    //     return "value";
-    // }
+    [HttpGet("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeamResponse))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(HttpErrorResponse))]
+    public async Task<IActionResult> GetAsync(int id)
+    {
+        var team = await _teamsService.GetByIdAsync(id);
+        return Ok(team);
+    }
 
-    // POST api/<TeamsController>
-    //[HttpPost]
-    //public void Post([FromBody] string value)
-    //{
-    //}
+    [HttpPost]
+    [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(TeamResponse))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(HttpErrorResponse))]
+    public async Task<IActionResult> Post([FromBody] CreateTeamRequest request)
+    {
+        var baseRequest = new BaseRequest<CreateTeamRequest>(null, CurrentUserId, request);
+        var team = await _teamsService.CreateAsync(baseRequest);
+        return CreatedAtAction(nameof(GetAsync), new { id = team.Id }, team);
+    }
 
-    // // PUT api/<TeamsController>/5
-    // [HttpPut("{id}")]
-    // public void Put(int id, [FromBody] string value)
-    // {
-    // }
+    [HttpPut("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeamResponse))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(HttpErrorResponse))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(HttpErrorResponse))]
+    public async Task<IActionResult> Put(int id, [FromBody] UpdateTeamRequest request)
+    {
+        var baseRequest = new BaseRequest<UpdateTeamRequest>(id, CurrentUserId, request);
+        var result = await _teamsService.UpdateAsync(baseRequest);
+        return Ok(result);
+    }
 
     // // DELETE api/<TeamsController>/5
     // [HttpDelete("{id}")]
