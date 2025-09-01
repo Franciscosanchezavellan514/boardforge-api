@@ -2,7 +2,9 @@
 using DevStack.Application.BoardForge.DTOs.Request;
 using DevStack.Application.BoardForge.DTOs.Response;
 using DevStack.Application.BoardForge.Interfaces;
+using DevStack.BoardForgeAPI.Authorization;
 using DevStack.BoardForgeAPI.Models;
+using DevStack.Domain.BoardForge.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,9 +15,10 @@ namespace DevStack.BoardForgeAPI.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
-public class TeamsController(ITeamsService teamsService) : BaseApiController
+public class TeamsController(ITeamsService teamsService, IAuthorizationService authorizationService) : BaseApiController
 {
     private readonly ITeamsService _teamsService = teamsService;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
 
     [HttpGet]
     [Route("my-teams")]
@@ -50,8 +53,13 @@ public class TeamsController(ITeamsService teamsService) : BaseApiController
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeamResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(HttpErrorResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(HttpErrorResponse))]
+    [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ForbidResult))]
     public async Task<IActionResult> Put(int id, [FromBody] UpdateTeamRequest request)
     {
+        var ownerRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Owner);
+        var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(id), ownerRequirement);
+        if (!auth.Succeeded) return Forbid();
+
         var baseRequest = new BaseRequest<UpdateTeamRequest>(id, CurrentUserId, request);
         var result = await _teamsService.UpdateAsync(baseRequest);
         return Ok(result);
