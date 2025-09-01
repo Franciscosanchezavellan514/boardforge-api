@@ -2,6 +2,7 @@ using DevStack.BoardForgeAPI.Authorization;
 using DevStack.BoardForgeAPI.Extensions;
 using DevStack.BoardForgeAPI.Middlewares;
 using DevStack.Infrastructure.BoardForge;
+using DevStack.Infrastructure.BoardForge.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
 
@@ -25,6 +26,13 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddScoped<IAuthorizationHandler, TeamRoleAuthorizationHandler>();
 
 var app = builder.Build();
+
+// Trigger database seeding
+using (var scope = app.Services.CreateScope())
+{
+    var seeder = scope.ServiceProvider.GetRequiredService<IDatabaseSeeder>();
+    await seeder.SeedAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
