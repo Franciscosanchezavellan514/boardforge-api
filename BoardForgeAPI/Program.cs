@@ -13,9 +13,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddJwtAuthentication(builder.Configuration);
-builder.Services.AddInfrastructureServices(builder.Configuration);
+// Security settings
 builder.Services.AddAuthorizationPolicies();
+builder.Services.AddJwtAuthentication(builder.Configuration);
+
+// Layer Services
+builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddSingleton<IAuthorizationHandler, TeamRoleAuthorizationHandler>();
 
