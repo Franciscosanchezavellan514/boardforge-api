@@ -65,6 +65,23 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
         return Ok(result);
     }
 
+    // Add members
+    [HttpPost]
+    [Route("{teamId:int}/members")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeamMembershipResponse))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(HttpErrorResponse))]
+    [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ForbidResult))]
+    public async Task<IActionResult> AddMembersAsync(int teamId, [FromBody] AddTeamMemberRequest request)
+    {
+        var ownerRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Owner);
+        var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(teamId), ownerRequirement);
+        if (!auth.Succeeded) return Forbid();
+
+        var baseRequest = new BaseRequest<AddTeamMemberRequest>(teamId, CurrentUserId, request);
+        TeamMembershipResponse response = await _teamsService.AddMemberAsync(baseRequest);
+        return Ok(response);
+    }
+
     // // DELETE api/<TeamsController>/5
     // [HttpDelete("{id}")]
     // public void Delete(int id)
