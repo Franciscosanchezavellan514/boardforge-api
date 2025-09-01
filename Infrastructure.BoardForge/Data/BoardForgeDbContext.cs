@@ -29,8 +29,10 @@ public class BoardForgeDbContext : DbContext
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).UseIdentityColumn(seed: 1000, increment: 1);
             // Ensure email is unique to prevent duplicate user accounts and support user identification.
             entity.HasIndex(e => e.Email).IsUnique();
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
         });
 
         modelBuilder.Entity<RefreshToken>(entity =>
@@ -50,6 +52,7 @@ public class BoardForgeDbContext : DbContext
         modelBuilder.Entity<Board>(entity =>
         {
             entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).UseIdentityColumn(seed: 1000, increment: 1);
             entity.HasMany(e => e.Columns)
                   .WithOne(c => c.Board)
                   .HasForeignKey(c => c.BoardId);
@@ -60,17 +63,20 @@ public class BoardForgeDbContext : DbContext
                   .WithMany(t => t.Boards)
                   .HasForeignKey(e => e.TeamId)
                   .OnDelete(DeleteBehavior.NoAction);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
         });
 
         modelBuilder.Entity<BoardColumn>(entity =>
         {
             entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).UseIdentityColumn(seed: 1000, increment: 1);
             entity.HasOne(e => e.Board)
                   .WithMany(b => b.Columns)
                   .HasForeignKey(e => e.BoardId);
             entity.HasMany(e => e.Cards)
                   .WithOne(c => c.BoardColumn)
                   .HasForeignKey(c => c.BoardColumnId);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
         });
 
         modelBuilder.Entity<Card>(entity =>
@@ -101,6 +107,7 @@ public class BoardForgeDbContext : DbContext
                   .WithMany(t => t.Cards)
                   .HasForeignKey(e => e.TeamId)
                   .OnDelete(DeleteBehavior.NoAction);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
         });
 
         modelBuilder.Entity<CardAttachment>(entity =>
@@ -114,6 +121,7 @@ public class BoardForgeDbContext : DbContext
                   .WithMany(u => u.Attachments)
                   .HasForeignKey(e => e.UploadedById)
                   .OnDelete(DeleteBehavior.NoAction);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
         });
 
         modelBuilder.Entity<CardComment>(entity =>
@@ -127,6 +135,7 @@ public class BoardForgeDbContext : DbContext
                   .WithMany(u => u.Comments)
                   .HasForeignKey(e => e.AuthorId)
                   .OnDelete(DeleteBehavior.NoAction);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
         });
 
         modelBuilder.Entity<Label>(entity =>
@@ -139,6 +148,7 @@ public class BoardForgeDbContext : DbContext
                   .WithMany(t => t.Labels)
                   .HasForeignKey(e => e.TeamId)
                   .OnDelete(DeleteBehavior.Cascade);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
         });
 
         modelBuilder.Entity<CardLabel>(entity =>
@@ -153,11 +163,13 @@ public class BoardForgeDbContext : DbContext
                   .WithMany(l => l.CardLabels)
                   .HasForeignKey(e => e.LabelId)
                   .OnDelete(DeleteBehavior.Cascade);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
         });
 
         modelBuilder.Entity<Team>(entity =>
         {
             entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).UseIdentityColumn(seed: 1000, increment: 1);
             entity.HasMany(e => e.Boards)
                   .WithOne(b => b.Team)
                   .HasForeignKey(b => b.TeamId);
@@ -170,6 +182,7 @@ public class BoardForgeDbContext : DbContext
             entity.HasMany(e => e.Cards)
                   .WithOne(c => c.Team)
                   .HasForeignKey(e => e.TeamId);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
         });
 
         modelBuilder.Entity<TeamMembership>(entity =>
@@ -184,6 +197,7 @@ public class BoardForgeDbContext : DbContext
                   .WithMany(u => u.TeamMemberships)
                   .HasForeignKey(e => e.UserId)
                   .OnDelete(DeleteBehavior.Cascade);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
         });
     }
 }
