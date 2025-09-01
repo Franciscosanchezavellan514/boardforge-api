@@ -5,7 +5,7 @@ namespace DevStack.Domain.BoardForge.Specifications;
 
 public class BaseSpecification<T> : ISpecification<T>
 {
-    public Expression<Func<T, bool>> Criteria { get; protected set; }
+    public Expression<Func<T, bool>>? Criteria { get; protected set; }
     public List<Expression<Func<T, object>>> Includes { get; protected set; } = [];
     public Expression<Func<T, object>>? OrderBy { get; protected set; }
     public Expression<Func<T, object>>? OrderByDescending { get; protected set; }
@@ -15,7 +15,7 @@ public class BaseSpecification<T> : ISpecification<T>
 
     public Expression<Func<T, object>>? GroupBy { get; protected set; }
 
-    public BaseSpecification(Expression<Func<T, bool>> criteria)
+    public void ApplyCriteria(Expression<Func<T, bool>> criteria)
     {
         Criteria = criteria;
     }

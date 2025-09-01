@@ -7,7 +7,7 @@ public interface ISpecification<T>
     /// <summary>
     /// The criteria to filter entities.
     /// </summary>
-    Expression<Func<T, bool>> Criteria { get; }
+    Expression<Func<T, bool>>? Criteria { get; }
     /// <summary>
     /// The related entities to include in the query.
     /// </summary>
