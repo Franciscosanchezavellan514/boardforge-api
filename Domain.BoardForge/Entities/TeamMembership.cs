@@ -8,6 +8,8 @@ public class TeamMembershipRole
     public const string Member = "Member";
     public const string Viewer = "Viewer";
 
+    public static readonly string[] AllRoles = { Owner, Member, Viewer };
+
     public static Role ToEnum(string role) => role.ToLower() switch
     {
         "owner" => Role.Owner,
