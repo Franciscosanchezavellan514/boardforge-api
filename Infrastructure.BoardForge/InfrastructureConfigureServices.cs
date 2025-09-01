@@ -22,6 +22,7 @@ public static partial class InfrastructureConfigureServices
                 sqlOptions => sqlOptions.MigrationsAssembly(typeof(BoardForgeDbContext).Assembly.FullName)));
 
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        services.Configure<AdminUserSeed>(configuration.GetSection(AdminUserSeed.SectionName));
 
         // Infrastructure Services
         services.AddScoped<ITokenService, TokenService>();
