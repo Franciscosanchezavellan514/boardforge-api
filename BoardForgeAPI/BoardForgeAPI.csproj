@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>DevStack.$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>DevStack.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+    <UserSecretsId>d3c154cd-3132-48e4-a824-fc6fae8d5c59</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
