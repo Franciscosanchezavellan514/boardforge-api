@@ -20,6 +20,7 @@ public interface ISpecification<T>
     /// The property to order the entities by in descending order.
     /// </summary>
     Expression<Func<T, object>>? OrderByDescending { get; }
+    Expression<Func<T, object>>? GroupBy { get; }
     /// <summary>
     /// Number of entities to take (for pagination).
     /// </summary>

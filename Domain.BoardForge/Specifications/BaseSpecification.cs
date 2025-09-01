@@ -13,6 +13,8 @@ public class BaseSpecification<T> : ISpecification<T>
     public int? Skip { get; protected set; }
     public bool IsPagingEnabled { get; protected set; }
 
+    public Expression<Func<T, object>>? GroupBy { get; protected set; }
+
     public BaseSpecification(Expression<Func<T, bool>> criteria)
     {
         Criteria = criteria;
@@ -23,6 +25,7 @@ public class BaseSpecification<T> : ISpecification<T>
     public void ApplyOrderBy(Expression<Func<T, object>> orderByExpression) => OrderBy = orderByExpression;
 
     public void ApplyOrderByDescending(Expression<Func<T, object>> orderByDescendingExpression) => OrderByDescending = orderByDescendingExpression;
+    public void ApplyGroupBy(Expression<Func<T, object>> groupByExpression) => GroupBy = groupByExpression;
 
     public void ApplyPaging(int skip, int take)
     {
