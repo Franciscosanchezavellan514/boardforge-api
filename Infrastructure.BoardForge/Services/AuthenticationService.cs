@@ -1,7 +1,6 @@
 ﻿using DevStack.Application.BoardForge.DTOs.Response;
 using DevStack.Application.BoardForge.Interfaces;
-using DevStack.Application.Endpoint.DTOs.Request;
-using DevStack.Application.Endpoint.Interfaces;
+using DevStack.Application.BoardForge.DTOs.Request;
 using DevStack.Domain.BoardForge.Entities;
 using DevStack.Domain.BoardForge.Exceptions;
 using DevStack.Domain.BoardForge.Interfaces.Repositories;

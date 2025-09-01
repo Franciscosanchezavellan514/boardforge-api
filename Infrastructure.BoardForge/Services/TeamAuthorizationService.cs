@@ -1,4 +1,4 @@
-using DevStack.Application.Endpoint.Interfaces;
+using DevStack.Application.BoardForge.Interfaces;
 using DevStack.Domain.BoardForge.Entities;
 using DevStack.Infrastructure.BoardForge.Data;
 using Microsoft.EntityFrameworkCore;

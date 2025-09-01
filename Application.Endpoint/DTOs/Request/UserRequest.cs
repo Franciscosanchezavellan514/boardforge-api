@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace DevStack.Application.Endpoint.DTOs.Request;
+namespace DevStack.Application.BoardForge.DTOs.Request;
 
 public class UserRequest
 {

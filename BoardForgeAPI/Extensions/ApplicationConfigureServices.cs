@@ -1,5 +1,5 @@
 using DevStack.Application.BoardForge.Services;
-using DevStack.Application.Endpoint.Interfaces;
+using DevStack.Application.BoardForge.Interfaces;
 
 namespace DevStack.BoardForgeAPI.Extensions;
 

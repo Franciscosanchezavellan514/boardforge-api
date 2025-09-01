@@ -1,6 +1,6 @@
-using DevStack.Application.Endpoint.DTOs.Response;
+using DevStack.Application.BoardForge.DTOs.Response;
 
-namespace DevStack.Application.Endpoint.Interfaces;
+namespace DevStack.Application.BoardForge.Interfaces;
 
 public interface ITeamsService
 {

@@ -1,4 +1,4 @@
-using DevStack.Application.Endpoint.DTOs.Request;
+using DevStack.Application.BoardForge.DTOs.Request;
 
 namespace DevStack.BoardForgeAPI.Utils;
 

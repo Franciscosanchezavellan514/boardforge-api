@@ -3,7 +3,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using DevStack.Application.BoardForge.DTOs.Response;
-using DevStack.Application.Endpoint.Interfaces;
+using DevStack.Application.BoardForge.Interfaces;
 using DevStack.Domain.BoardForge.Entities;
 using DevStack.Infrastructure.BoardForge.Models;
 using Microsoft.Extensions.Options;

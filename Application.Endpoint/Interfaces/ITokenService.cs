@@ -1,7 +1,7 @@
 using DevStack.Application.BoardForge.DTOs.Response;
 using DevStack.Domain.BoardForge.Entities;
 
-namespace DevStack.Application.Endpoint.Interfaces;
+namespace DevStack.Application.BoardForge.Interfaces;
 
 public interface ITokenService
 {

@@ -1,5 +1,5 @@
 ﻿using DevStack.Application.BoardForge.DTOs.Response;
-using DevStack.Application.Endpoint.DTOs.Request;
+using DevStack.Application.BoardForge.DTOs.Request;
 
 namespace DevStack.Application.BoardForge.Interfaces;
 

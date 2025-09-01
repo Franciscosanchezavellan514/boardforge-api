@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using DevStack.Application.Endpoint.Interfaces;
+using DevStack.Application.BoardForge.Interfaces;
 using DevStack.Domain.BoardForge.Entities;
 using Microsoft.AspNetCore.Authorization;
 

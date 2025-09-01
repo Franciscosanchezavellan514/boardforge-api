@@ -1,7 +1,7 @@
 ﻿using System.Net.Mime;
 using DevStack.Application.BoardForge.DTOs.Response;
 using DevStack.Application.BoardForge.Interfaces;
-using DevStack.Application.Endpoint.DTOs.Request;
+using DevStack.Application.BoardForge.DTOs.Request;
 using DevStack.BoardForgeAPI.Utils;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,4 +1,4 @@
-namespace DevStack.Application.Endpoint.DTOs.Request;
+namespace DevStack.Application.BoardForge.DTOs.Request;
 
 public class UserResponse
 {

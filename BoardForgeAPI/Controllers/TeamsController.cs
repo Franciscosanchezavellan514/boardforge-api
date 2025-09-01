@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
-using DevStack.Application.Endpoint.DTOs.Response;
-using DevStack.Application.Endpoint.Interfaces;
+using DevStack.Application.BoardForge.DTOs.Response;
+using DevStack.Application.BoardForge.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

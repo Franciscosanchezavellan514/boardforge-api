@@ -3,10 +3,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using DevStack.Infrastructure.BoardForge.Models;
-using DevStack.Application.Endpoint.Interfaces;
+using DevStack.Application.BoardForge.Interfaces;
 using DevStack.Infrastructure.BoardForge.Services;
 using DevStack.Infrastructure.BoardForge.Interfaces;
-using DevStack.Application.BoardForge.Interfaces;
 using DevStack.Domain.BoardForge.Interfaces.Repositories;
 using DevStack.Infrastructure.BoardForge.Data.Repositories;
 
