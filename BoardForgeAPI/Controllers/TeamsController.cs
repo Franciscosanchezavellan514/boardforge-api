@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using DevStack.Application.BoardForge.DTOs.Request;
+﻿using DevStack.Application.BoardForge.DTOs.Request;
 using DevStack.Application.BoardForge.DTOs.Response;
 using DevStack.Application.BoardForge.Interfaces;
 using DevStack.BoardForgeAPI.Authorization;
