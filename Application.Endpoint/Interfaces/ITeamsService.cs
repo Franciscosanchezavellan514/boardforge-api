@@ -9,5 +9,5 @@ public interface ITeamsService
     Task<IEnumerable<TeamResponse>> ListMyTeamsAsync(int userId);
     Task<TeamResponse> CreateAsync(BaseRequest<CreateTeamRequest> request);
     Task<TeamResponse> UpdateAsync(BaseRequest<UpdateTeamRequest> request);
-    Task AddMemberAsync(BaseRequest<AddTeamMemberRequest> request);
+    Task<TeamMembershipResponse> AddMemberAsync(BaseRequest<AddTeamMemberRequest> request);
 }

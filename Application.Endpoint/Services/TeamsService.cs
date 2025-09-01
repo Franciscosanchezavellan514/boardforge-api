@@ -13,7 +13,7 @@ public class TeamsService(IUnitOfWork unitOfWork) : ITeamsService
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-    public async Task AddMemberAsync(BaseRequest<AddTeamMemberRequest> request)
+    public async Task<TeamMembershipResponse> AddMemberAsync(BaseRequest<AddTeamMemberRequest> request)
     {
         if (request.ObjectId == null) throw new ArgumentException("ObjectId must be provided");
         if (!TeamMembershipRole.AllRoles.Contains(request.Data.Role)) throw new ArgumentException("Invalid role");
@@ -30,6 +30,14 @@ public class TeamsService(IUnitOfWork unitOfWork) : ITeamsService
 
         await _unitOfWork.TeamMemberships.AddAsync(membership);
         await _unitOfWork.SaveChangesAsync();
+
+        return new TeamMembershipResponse(
+            membership.UserId,
+            membership.TeamId,
+            membership.Role,
+            membership.CreatedAt,
+            membership.CreatedBy
+        );
     }
 
     public async Task<TeamResponse> CreateAsync(BaseRequest<CreateTeamRequest> request)
