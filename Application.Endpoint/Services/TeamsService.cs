@@ -47,7 +47,8 @@ public class TeamsService(IUnitOfWork unitOfWork) : ITeamsService
             Name = request.Data.Name,
             Description = request.Data.Description,
             CreatedBy = request.UserId,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            IsActive = true
         };
         await _unitOfWork.Teams.AddAsync(newTeam);
 
