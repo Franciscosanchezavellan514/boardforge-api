@@ -2,7 +2,9 @@
 using DevStack.Application.BoardForge.DTOs.Request;
 using DevStack.Domain.BoardForge.Entities;
 using DevStack.Infrastructure.BoardForge.Interfaces;
+using DevStack.Infrastructure.BoardForge.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace DevStack.Infrastructure.BoardForge.Data;
 
@@ -10,11 +12,13 @@ public class DatabaseSeeder : IDatabaseSeeder
 {
     private readonly BoardForgeDbContext _context;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly AdminUserSeed _adminUserSeed;
 
-    public DatabaseSeeder(BoardForgeDbContext context, IPasswordHasher passwordHasher)
+    public DatabaseSeeder(BoardForgeDbContext context, IPasswordHasher passwordHasher, IOptions<AdminUserSeed> adminOptions)
     {
         _context = context;
         _passwordHasher = passwordHasher;
+        _adminUserSeed = adminOptions.Value;
     }
 
     public async Task SeedAsync()
@@ -33,6 +37,12 @@ public class DatabaseSeeder : IDatabaseSeeder
             new() { Email = "obito.uchiha@devstack.com", Password = "UchihaClan123!" },
             new() { Email = "kakashi.uchiha@devstack.com", Password = "UchihaClan123!" }
         };
+
+        if (_adminUserSeed.IsValid)
+        {
+            var adminReq = new UserRequest { Email = _adminUserSeed.Email, Password = _adminUserSeed.Password };
+            requests.Add(adminReq);
+        }
 
         List<User> users = new();
         foreach (var request in requests)
