@@ -53,7 +53,7 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeamResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(HttpErrorResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(HttpErrorResponse))]
-    [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ForbidResult))]
+    [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(HttpErrorResponse))]
     public async Task<IActionResult> Put(int id, [FromBody] UpdateTeamRequest request)
     {
         var ownerRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Owner);
@@ -70,7 +70,7 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
     [Route("{teamId:int}/members")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeamMembershipResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(HttpErrorResponse))]
-    [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ForbidResult))]
+    [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(HttpErrorResponse))]
     public async Task<IActionResult> AddMembersAsync(int teamId, [FromBody] AddTeamMemberRequest request)
     {
         var ownerRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Owner);
@@ -84,7 +84,7 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
 
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeamResponse))]
-    [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ForbidResult))]
+    [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(HttpErrorResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(HttpErrorResponse))]
     public async Task<IActionResult> Delete(int id)
     {
