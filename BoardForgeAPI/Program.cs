@@ -4,7 +4,6 @@ using DevStack.BoardForgeAPI.Middlewares;
 using DevStack.Infrastructure.BoardForge;
 using DevStack.Infrastructure.BoardForge.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.OpenApi.Models;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +11,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog((context, loggerConfiguration) =>
 {
     loggerConfiguration.WriteTo.Console();
+    string currentDirectory = Directory.GetCurrentDirectory();
+    string logFilePath = Path.Combine(currentDirectory, "Logs", "log-.json");
+    loggerConfiguration.WriteTo.File(
+        formatter: new Serilog.Formatting.Json.JsonFormatter(),
+        logFilePath,
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 30
+    );
     loggerConfiguration.ReadFrom.Configuration(context.Configuration);
 });
 
@@ -33,6 +40,8 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddScoped<IAuthorizationHandler, TeamRoleAuthorizationHandler>();
 
 var app = builder.Build();
+
+app.UseSerilogRequestLogging();
 
 // Trigger database seeding
 using (var scope = app.Services.CreateScope())
