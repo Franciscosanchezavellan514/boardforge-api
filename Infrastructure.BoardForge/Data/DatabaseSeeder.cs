@@ -5,6 +5,7 @@ using DevStack.Domain.BoardForge.Entities;
 using DevStack.Infrastructure.BoardForge.Interfaces;
 using DevStack.Infrastructure.BoardForge.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace DevStack.Infrastructure.BoardForge.Data;
@@ -14,18 +15,26 @@ public class DatabaseSeeder : IDatabaseSeeder
     private readonly BoardForgeDbContext _context;
     private readonly IPasswordHasher _passwordHasher;
     private readonly AdminUserSeed _adminUserSeed;
+    private readonly ILogger<DatabaseSeeder> _logger;
 
-    public DatabaseSeeder(BoardForgeDbContext context, IPasswordHasher passwordHasher, IOptions<AdminUserSeed> adminOptions)
+    public DatabaseSeeder(
+        BoardForgeDbContext context,
+        IPasswordHasher passwordHasher,
+        IOptions<AdminUserSeed> adminOptions,
+        ILogger<DatabaseSeeder> logger)
     {
         _context = context;
         _passwordHasher = passwordHasher;
         _adminUserSeed = adminOptions.Value;
+        _logger = logger;
     }
 
     public async Task SeedAsync()
     {
+        _logger.LogInformation("Starting database migration and seeding...");
         await _context.Database.MigrateAsync();
         await SeedUserAsync();
+        _logger.LogInformation("Database migration and seeding completed.");
     }
 
     private async Task SeedUserAsync()
@@ -65,6 +74,7 @@ public class DatabaseSeeder : IDatabaseSeeder
             users.Add(user);
         }
 
+        _logger.LogInformation("Seeding {UserCount} users into the database.", users.Count);
         await _context.Users.AddRangeAsync(users);
         await _context.SaveChangesAsync();
     }
