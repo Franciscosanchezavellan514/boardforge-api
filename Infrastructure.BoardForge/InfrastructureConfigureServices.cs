@@ -27,7 +27,6 @@ public static partial class InfrastructureConfigureServices
         // Infrastructure Services
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IPasswordHasher, PasswordHasherService>();
-        services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<ITeamAuthorizationService, TeamAuthorizationService>();
         services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
 

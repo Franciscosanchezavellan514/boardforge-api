@@ -4,9 +4,8 @@ using DevStack.Application.BoardForge.DTOs.Request;
 using DevStack.Domain.BoardForge.Entities;
 using DevStack.Domain.BoardForge.Exceptions;
 using DevStack.Domain.BoardForge.Interfaces.Repositories;
-using DevStack.Infrastructure.BoardForge.Interfaces;
 
-namespace DevStack.Infrastructure.BoardForge.Services;
+namespace DevStack.Application.BoardForge.Services;
 
 public class AuthenticationService(IUnitOfWork unitOfWork, ITokenService tokenService, IPasswordHasher passwordHasher) : IAuthenticationService
 {

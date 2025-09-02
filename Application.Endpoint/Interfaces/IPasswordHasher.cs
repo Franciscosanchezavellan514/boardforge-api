@@ -1,4 +1,4 @@
-﻿namespace DevStack.Infrastructure.BoardForge.Interfaces;
+﻿namespace DevStack.Application.BoardForge.Interfaces;
 
 public interface IPasswordHasher
 {

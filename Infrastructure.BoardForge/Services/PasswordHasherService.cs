@@ -1,5 +1,5 @@
 using System.Security.Cryptography;
-using DevStack.Infrastructure.BoardForge.Interfaces;
+using DevStack.Application.BoardForge.Interfaces;
 
 namespace DevStack.Infrastructure.BoardForge.Services;
 
