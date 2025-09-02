@@ -4,6 +4,7 @@ using DevStack.Application.BoardForge.Interfaces;
 using DevStack.BoardForgeAPI.Authorization;
 using DevStack.BoardForgeAPI.Models;
 using DevStack.Domain.BoardForge.Entities;
+using DevStack.Infrastructure.BoardForge.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -57,7 +58,7 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
     {
         var ownerRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Owner);
         var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(id), ownerRequirement);
-        if (!auth.Succeeded) return Forbid();
+        if (!auth.Succeeded) throw new ForbiddenException();
 
         var baseRequest = new BaseRequest<UpdateTeamRequest>(id, CurrentUserId, request);
         var result = await _teamsService.UpdateAsync(baseRequest);
@@ -74,7 +75,7 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
     {
         var ownerRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Owner);
         var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(teamId), ownerRequirement);
-        if (!auth.Succeeded) return Forbid();
+        if (!auth.Succeeded) throw new ForbiddenException();
 
         var baseRequest = new BaseRequest<AddTeamMemberRequest>(teamId, CurrentUserId, request);
         TeamMembershipResponse response = await _teamsService.AddMemberAsync(baseRequest);
@@ -89,7 +90,7 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
     {
         var ownerRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Owner);
         var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(id), ownerRequirement);
-        if (!auth.Succeeded) return Forbid();
+        if (!auth.Succeeded) throw new ForbiddenException();
 
         var baseRequest = new BaseRequest(id, CurrentUserId);
         var result = await _teamsService.SoftDeleteAsync(baseRequest);
