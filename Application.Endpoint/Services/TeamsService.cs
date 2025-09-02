@@ -111,4 +111,18 @@ public class TeamsService(IUnitOfWork unitOfWork) : ITeamsService
 
         return new TeamResponse(dbTeam.Id, dbTeam.Name, dbTeam.Description, dbTeam.TeamMemberships.Count);
     }
+
+    public async Task<TeamResponse> SoftDeleteAsync(BaseRequest request)
+    {
+        var team = await _unitOfWork.Teams.GetByIdAsync(request.ObjectId);
+        if (team is null) throw new EntityNotFoundException($"Team with ID {request.ObjectId} not found");
+
+        team.IsActive = false;
+        team.DeletedAt = DateTime.UtcNow;
+        team.DeletedBy = request.UserId;
+
+        await _unitOfWork.SaveChangesAsync();
+
+        return new TeamResponse(team.Id, team.Name, team.Description, team.TeamMemberships.Count);
+    }
 }
