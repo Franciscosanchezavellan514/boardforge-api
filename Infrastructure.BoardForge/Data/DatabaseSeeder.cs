@@ -1,5 +1,6 @@
 
 using DevStack.Application.BoardForge.DTOs.Request;
+using DevStack.Application.BoardForge.Interfaces;
 using DevStack.Domain.BoardForge.Entities;
 using DevStack.Infrastructure.BoardForge.Interfaces;
 using DevStack.Infrastructure.BoardForge.Models;
