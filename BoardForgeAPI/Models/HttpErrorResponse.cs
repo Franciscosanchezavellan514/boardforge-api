@@ -31,6 +31,7 @@ public class HttpErrorResponse
             UnauthorizedAccessException e => new HttpErrorResponse(StatusCodes.Status401Unauthorized, e.Message),
             ArgumentException e => new HttpErrorResponse(StatusCodes.Status400BadRequest, e.Message),
             EntityNotFoundException e => new HttpErrorResponse(StatusCodes.Status404NotFound, e.Message),
+            KeyNotFoundException e => new HttpErrorResponse(StatusCodes.Status404NotFound, e.Message),
             // Add more exceptions here...
             _ => new HttpErrorResponse(StatusCodes.Status500InternalServerError, "Internal server error. Please retry later."),
         };
