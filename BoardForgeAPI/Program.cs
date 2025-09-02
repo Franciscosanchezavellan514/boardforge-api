@@ -5,8 +5,15 @@ using DevStack.Infrastructure.BoardForge;
 using DevStack.Infrastructure.BoardForge.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, loggerConfiguration) =>
+{
+    loggerConfiguration.WriteTo.Console();
+    loggerConfiguration.ReadFrom.Configuration(context.Configuration);
+});
 
 // Add services to the container.
 
