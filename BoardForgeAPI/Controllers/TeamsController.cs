@@ -81,9 +81,19 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
         return Ok(response);
     }
 
-    // // DELETE api/<TeamsController>/5
-    // [HttpDelete("{id}")]
-    // public void Delete(int id)
-    // {
-    // }
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeamResponse))]
+    [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ForbidResult))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(HttpErrorResponse))]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var ownerRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Owner);
+        var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(id), ownerRequirement);
+        if (!auth.Succeeded) return Forbid();
+
+        var baseRequest = new BaseRequest(id, CurrentUserId);
+        var result = await _teamsService.SoftDeleteAsync(baseRequest);
+
+        return Ok(result);
+    }
 }
