@@ -10,3 +10,15 @@ public sealed class TeamsByUserIdSpecification : BaseSpecification<Team>
         AddInclude(t => t.TeamMemberships.Where(tm => tm.IsActive));
     }
 }
+
+public sealed class GetTeamMembershipByUserAndTeamSpecification : BaseSpecification<TeamMembership>
+{
+    public GetTeamMembershipByUserAndTeamSpecification(int userId, int teamId, bool includeActiveOnly = true)
+    {
+        ApplyCriteria(tm => tm.UserId == userId && tm.TeamId == teamId);
+        if (includeActiveOnly)
+        {
+            ApplyCriteria(tm => tm.IsActive);
+        }
+    }
+}
