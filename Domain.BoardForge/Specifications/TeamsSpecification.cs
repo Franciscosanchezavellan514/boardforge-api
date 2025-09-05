@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using DevStack.Domain.BoardForge.Entities;
 
 namespace DevStack.Domain.BoardForge.Specifications;
@@ -15,11 +16,18 @@ public sealed class GetTeamMembershipByUserAndTeamSpecification : BaseSpecificat
 {
     public GetTeamMembershipByUserAndTeamSpecification(int userId, int teamId, bool includeActiveOnly = true)
     {
-        ApplyCriteria(tm => tm.UserId == userId && tm.TeamId == teamId);
+        Expression<Func<TeamMembership, bool>> criteria;
+
         if (includeActiveOnly)
         {
-            ApplyCriteria(tm => tm.IsActive);
+            criteria = tm => tm.UserId == userId && tm.TeamId == teamId && tm.IsActive == true;
         }
+        else
+        {
+            criteria = tm => tm.UserId == userId && tm.TeamId == teamId;
+        }
+
+        ApplyCriteria(criteria);
     }
 }
 
@@ -27,11 +35,17 @@ public sealed class GetTeamMembershipsByTeamSpecification : BaseSpecification<Te
 {
     public GetTeamMembershipsByTeamSpecification(int teamId, bool includeActiveOnly = true)
     {
-        ApplyCriteria(tm => tm.TeamId == teamId);
+        Expression<Func<TeamMembership, bool>> criteria;
+
         if (includeActiveOnly)
         {
-            ApplyCriteria(tm => tm.IsActive);
+            criteria = tm => tm.TeamId == teamId && tm.IsActive == true;
         }
-        AddInclude(tm => tm.User!);
+        else
+        {
+            criteria = tm => tm.TeamId == teamId;
+        }
+
+        ApplyCriteria(criteria);
     }
 }
