@@ -11,5 +11,6 @@ public interface ITeamsService
     Task<TeamResponse> UpdateAsync(BaseRequest<UpdateTeamRequest> request);
     Task<TeamMembershipResponse> AddMemberAsync(BaseRequest<AddTeamMemberRequest> request);
     Task<TeamMembershipResponse> RemoveMemberAsync(BaseRequest<RemoveTeamMemberRequest> request);
+    Task<IEnumerable<TeamMembersResponse>> ListMembersAsync(int teamId);
     Task<TeamResponse> SoftDeleteAsync(BaseRequest request);
 }

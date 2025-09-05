@@ -144,4 +144,24 @@ public class TeamsService(IUnitOfWork unitOfWork) : ITeamsService
             membership.CreatedBy
         );
     }
+
+    public async Task<IEnumerable<TeamMembersResponse>> ListMembersAsync(int teamId)
+    {
+        if (teamId <= 0) throw new ArgumentException("Invalid team ID");
+
+        if (!await _unitOfWork.Teams.ExistsAsync(teamId))
+            throw new EntityNotFoundException($"Team with ID {teamId} not found");
+
+        var members = await _unitOfWork.TeamMemberships.ListAsync(
+            new GetTeamMembershipsByTeamSpecification(teamId)
+        );
+
+        return members.Select(m => new TeamMembersResponse(
+            m.UserId,
+            m.User!.DisplayName,
+            m.User!.Email,
+            m.Role,
+            m.CreatedAt
+        ));
+    }
 }
