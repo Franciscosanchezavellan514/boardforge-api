@@ -38,6 +38,7 @@ builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddScoped<IAuthorizationHandler, TeamRoleAuthorizationHandler>();
+builder.Services.AddMemoryCache();
 
 var app = builder.Build();
 
