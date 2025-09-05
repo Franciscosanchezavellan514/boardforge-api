@@ -47,5 +47,6 @@ public sealed class GetTeamMembershipsByTeamSpecification : BaseSpecification<Te
         }
 
         ApplyCriteria(criteria);
+        AddInclude(tm => tm.User!);
     }
 }
