@@ -157,6 +157,7 @@ public class TeamsService(IUnitOfWork unitOfWork) : ITeamsService
         );
 
         return members.Select(m => new TeamMembersResponse(
+            m.TeamId,
             m.UserId,
             m.User!.DisplayName,
             m.User!.Email,
