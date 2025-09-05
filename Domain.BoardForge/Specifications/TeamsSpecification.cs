@@ -22,3 +22,16 @@ public sealed class GetTeamMembershipByUserAndTeamSpecification : BaseSpecificat
         }
     }
 }
+
+public sealed class GetTeamMembershipsByTeamSpecification : BaseSpecification<TeamMembership>
+{
+    public GetTeamMembershipsByTeamSpecification(int teamId, bool includeActiveOnly = true)
+    {
+        ApplyCriteria(tm => tm.TeamId == teamId);
+        if (includeActiveOnly)
+        {
+            ApplyCriteria(tm => tm.IsActive);
+        }
+        AddInclude(tm => tm.User!);
+    }
+}
