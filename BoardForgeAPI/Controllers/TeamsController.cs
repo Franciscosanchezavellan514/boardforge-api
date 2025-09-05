@@ -20,8 +20,10 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
     private readonly ITeamsService _teamsService = teamsService;
     private readonly IAuthorizationService _authorizationService = authorizationService;
 
+    /// <summary>
+    /// Get all teams the current user is a member of
+    /// </summary>
     [HttpGet]
-    [Route("my-teams")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<TeamResponse>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(HttpErrorResponse))]
     public async Task<IActionResult> GetMyTeamsAsync()
