@@ -9,6 +9,7 @@ public interface IAsyncRepository<TEntity> where TEntity : BaseEntity
     Task<TEntity> AddAsync(TEntity entity);
     Task UpdateAsync(TEntity entity);
     Task DeleteAsync(TEntity entity);
+    Task<bool> ExistsAsync(int id);
     Task<List<TEntity>> AddAsync(List<TEntity> entity);
     Task<List<TEntity>> DeleteAsync(List<TEntity> entity);
     Task<List<TEntity>> UpdateAsync(List<TEntity> entity);
@@ -18,5 +19,6 @@ public interface IAsyncRepository<TEntity> where TEntity : BaseEntity
     // specification pattern
     Task<IReadOnlyList<TEntity>> ListAsync(ISpecification<TEntity> spec);
     Task<int> CountAsync(ISpecification<TEntity> spec);
+    Task<bool> ExistsAsync(ISpecification<TEntity> spec);
     IQueryable<TEntity> ApplySpecification(ISpecification<TEntity> spec);
 }

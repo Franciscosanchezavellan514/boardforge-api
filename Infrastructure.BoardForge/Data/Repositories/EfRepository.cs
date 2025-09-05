@@ -85,4 +85,14 @@ public class EfRepository<TEntity> : IAsyncRepository<TEntity> where TEntity : B
         IQueryable<TEntity> query = SpecificationEvaluator<TEntity>.GetQuery(_dbContext.Set<TEntity>().AsQueryable(), spec);
         return query;
     }
+
+    public async Task<bool> ExistsAsync(int id)
+    {
+        return await _dbContext.Set<TEntity>().FindAsync(id) is not null;
+    }
+
+    public async Task<bool> ExistsAsync(ISpecification<TEntity> spec)
+    {
+        return await ApplySpecification(spec).AnyAsync();
+    }
 }
