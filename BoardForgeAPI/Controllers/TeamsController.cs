@@ -82,6 +82,22 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
         return Ok(response);
     }
 
+    // Remove members
+    [HttpDelete("{teamId:int}/members/{userId:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeamMembershipResponse))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(HttpErrorResponse))]
+    [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(HttpErrorResponse))]
+    public async Task<IActionResult> RemoveMembersAsync(int teamId, int userId)
+    {
+        var ownerRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Owner);
+        var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(teamId), ownerRequirement);
+        if (!auth.Succeeded) throw new ForbiddenException();
+
+        var baseRequest = new BaseRequest<RemoveTeamMemberRequest>(teamId, CurrentUserId, new RemoveTeamMemberRequest(userId));
+        TeamMembershipResponse response = await _teamsService.RemoveMemberAsync(baseRequest);
+        return Ok(response);
+    }
+
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeamResponse))]
     [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(HttpErrorResponse))]
