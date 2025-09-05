@@ -16,7 +16,7 @@ public class TeamAuthorizationService(BoardForgeDbContext dbContext, IMemoryCach
         var key = $"TeamRole.{userId}.{teamId}";
         if (_cache.TryGetValue(key, out TeamMembershipRole.Role role)) return role;
 
-        TeamMembership? membership = await _dbContext.TeamMemberships.Where(tm => tm.UserId == userId && tm.TeamId == teamId)
+        TeamMembership? membership = await _dbContext.TeamMemberships.Where(tm => tm.IsActive && tm.UserId == userId && tm.TeamId == teamId)
             .FirstOrDefaultAsync();
 
         if (membership is null) return null;
