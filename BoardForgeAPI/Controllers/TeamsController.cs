@@ -81,6 +81,15 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
         return Ok(result);
     }
 
+    [HttpGet("{teamId:int}/members")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<TeamMembersResponse>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(HttpErrorResponse))]
+    public async Task<IActionResult> GetMembersAsync(int teamId)
+    {
+        var members = await _teamsService.ListMembersAsync(teamId);
+        return Ok(members);
+    }
+
     // Add members
     [HttpPost]
     [Route("{teamId:int}/members")]
