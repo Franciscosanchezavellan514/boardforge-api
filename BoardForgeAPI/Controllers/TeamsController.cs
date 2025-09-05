@@ -65,6 +65,22 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
         return Ok(result);
     }
 
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeamResponse))]
+    [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(HttpErrorResponse))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(HttpErrorResponse))]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var ownerRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Owner);
+        var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(id), ownerRequirement);
+        if (!auth.Succeeded) throw new ForbiddenException();
+
+        var baseRequest = new BaseRequest(id, CurrentUserId);
+        var result = await _teamsService.SoftDeleteAsync(baseRequest);
+
+        return Ok(result);
+    }
+
     // Add members
     [HttpPost]
     [Route("{teamId:int}/members")]
@@ -96,21 +112,5 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
         var baseRequest = new BaseRequest<RemoveTeamMemberRequest>(teamId, CurrentUserId, new RemoveTeamMemberRequest(userId));
         TeamMembershipResponse response = await _teamsService.RemoveMemberAsync(baseRequest);
         return Ok(response);
-    }
-
-    [HttpDelete("{id}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeamResponse))]
-    [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(HttpErrorResponse))]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(HttpErrorResponse))]
-    public async Task<IActionResult> Delete(int id)
-    {
-        var ownerRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Owner);
-        var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(id), ownerRequirement);
-        if (!auth.Succeeded) throw new ForbiddenException();
-
-        var baseRequest = new BaseRequest(id, CurrentUserId);
-        var result = await _teamsService.SoftDeleteAsync(baseRequest);
-
-        return Ok(result);
     }
 }
