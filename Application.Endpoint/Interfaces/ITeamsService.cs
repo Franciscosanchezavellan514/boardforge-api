@@ -10,5 +10,6 @@ public interface ITeamsService
     Task<TeamResponse> CreateAsync(BaseRequest<CreateTeamRequest> request);
     Task<TeamResponse> UpdateAsync(BaseRequest<UpdateTeamRequest> request);
     Task<TeamMembershipResponse> AddMemberAsync(BaseRequest<AddTeamMemberRequest> request);
+    Task<TeamMembershipResponse> RemoveMemberAsync(BaseRequest<RemoveTeamMemberRequest> request);
     Task<TeamResponse> SoftDeleteAsync(BaseRequest request);
 }

@@ -125,4 +125,23 @@ public class TeamsService(IUnitOfWork unitOfWork) : ITeamsService
 
         return new TeamResponse(team.Id, team.Name, team.Description, team.TeamMemberships.Count);
     }
+
+    public async Task<TeamMembershipResponse> RemoveMemberAsync(BaseRequest<RemoveTeamMemberRequest> request)
+    {
+        if (request.ObjectId == null) throw new ArgumentException("ObjectId must be provided");
+
+        TeamMembership membership = _unitOfWork.TeamMemberships.ApplySpecification(
+            new GetTeamMembershipByUserAndTeamSpecification(request.Data.UserId, request.ObjectId.Value, false)
+        ).FirstOrDefault() ?? throw new KeyNotFoundException("Team membership not found");
+
+        await _unitOfWork.TeamMemberships.DeleteAsync(membership);
+        await _unitOfWork.SaveChangesAsync();
+        return new TeamMembershipResponse(
+            membership.UserId,
+            membership.TeamId,
+            membership.Role,
+            membership.CreatedAt,
+            membership.CreatedBy
+        );
+    }
 }
