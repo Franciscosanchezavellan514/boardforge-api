@@ -21,6 +21,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Application.Endpoint\Application.BoardForge.csproj" />
+    <ProjectReference Include="..\Domain.BoardForge\Domain.BoardForge.csproj" />
+    <ProjectReference Include="..\Infrastructure.BoardForge\Infrastructure.BoardForge.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Microsoft.Playwright.MSTest" />
     <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
     <Using Include="System.Text.RegularExpressions" />
