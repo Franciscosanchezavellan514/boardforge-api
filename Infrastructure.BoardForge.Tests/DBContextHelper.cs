@@ -22,4 +22,14 @@ public static class DBContextHelper
         return new BoardForgeDbContext(options);
     }
 
+    public static BoardForgeDbContext CreateContext()
+    {
+        return CreateContext(null);
+    }
+
+    public static void ClearDatabase(BoardForgeDbContext context)
+    {
+        context.Database.EnsureDeleted();
+        context.SaveChanges();
+    }
 }
