@@ -86,6 +86,8 @@ public class TokenServiceTests
 
         Assert.IsNotNull(validatedToken);
         Assert.IsInstanceOfType(validatedToken, typeof(JwtSecurityToken));
+        Assert.AreEqual(_jwtOptions.Issuer, ((JwtSecurityToken)validatedToken).Issuer);
+        Assert.AreEqual(_jwtOptions.Audience, ((JwtSecurityToken)validatedToken).Audiences.First());
     }
 
     [TestMethod]
