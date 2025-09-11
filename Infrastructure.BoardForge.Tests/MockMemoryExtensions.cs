@@ -1,8 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
 
 namespace DevStack.Infrastructure.BoardForge.Tests;
 
+[ExcludeFromCodeCoverage]
 public static class MemoryCacheMoqExtensions
 {
     /// <summary>
