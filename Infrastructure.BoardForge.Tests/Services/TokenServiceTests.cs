@@ -5,6 +5,7 @@ using DevStack.Domain.BoardForge.Entities;
 using DevStack.Infrastructure.BoardForge.Models;
 using DevStack.Infrastructure.BoardForge.Services;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Time.Testing;
 using Microsoft.IdentityModel.Tokens;
 using Moq;
 
@@ -14,6 +15,7 @@ namespace DevStack.Infrastructure.BoardForge.Tests.Services;
 public class TokenServiceTests
 {
     private readonly Mock<IOptions<JwtOptions>> _optionsMock;
+    private readonly FakeTimeProvider fakeTimeProvider;
     private readonly JwtOptions _jwtOptions;
     private ITokenService _service;
 
@@ -22,7 +24,8 @@ public class TokenServiceTests
         _optionsMock = new Mock<IOptions<JwtOptions>>();
         _jwtOptions = CreateTestJwtOptions();
         _optionsMock.Setup(o => o.Value).Returns(_jwtOptions);
-        _service = new TokenService(_optionsMock.Object);
+        fakeTimeProvider = new FakeTimeProvider();
+        _service = new TokenService(_optionsMock.Object, fakeTimeProvider);
     }
 
     public static User CreateTestUser() => new()
@@ -63,6 +66,7 @@ public class TokenServiceTests
         User user = CreateTestUser();
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = System.Text.Encoding.UTF8.GetBytes(_jwtOptions.SigningKey);
+        fakeTimeProvider.SetUtcNow(DateTime.UtcNow);
 
         // Act
         var (tokenString, _) = _service.GenerateToken(user);
@@ -91,6 +95,7 @@ public class TokenServiceTests
         User user = CreateTestUser();
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = System.Text.Encoding.UTF8.GetBytes(_jwtOptions.SigningKey);
+        fakeTimeProvider.SetUtcNow(DateTime.UtcNow);
 
         // Act
         var (tokenString, _) = _service.GenerateToken(user);
@@ -114,5 +119,24 @@ public class TokenServiceTests
         Assert.AreEqual(user.Email, principal.FindFirst(ClaimTypes.Email)?.Value);
         Assert.AreEqual(user.DisplayName, principal.FindFirst(ClaimTypes.Name)?.Value);
         Assert.AreEqual(user.EmailConfirmed.ToString(), principal.FindFirst("email_confirmed")?.Value);
+    }
+
+    [TestMethod]
+    public void GenerateToken_Should_SetCorrectExpiration()
+    {
+        // Arrange
+        User user = CreateTestUser();
+        DateTime fakeNow = new(2025, 9, 11, 1, 49, 0, DateTimeKind.Utc);
+        fakeTimeProvider.SetUtcNow(fakeNow);
+        var tokenHandler = new JwtSecurityTokenHandler();
+
+        // Act
+        var (tokenString, expiresAtUtc) = _service.GenerateToken(user);
+
+        // Assert
+        Assert.AreEqual(fakeNow.AddMinutes(_jwtOptions.AccessTokenMinutes), expiresAtUtc);
+
+        var jwtToken = tokenHandler.ReadJwtToken(tokenString);
+        Assert.AreEqual(fakeNow.AddMinutes(_jwtOptions.AccessTokenMinutes), jwtToken.ValidTo);
     }
 }
