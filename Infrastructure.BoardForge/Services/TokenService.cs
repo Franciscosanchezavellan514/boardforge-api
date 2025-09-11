@@ -11,15 +11,18 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace DevStack.Infrastructure.BoardForge.Services;
 
-public class TokenService(IOptions<JwtOptions> jwtOptions) : ITokenService
+public class TokenService(IOptions<JwtOptions> jwtOptions, TimeProvider timeProvider) : ITokenService
 {
-    private readonly JwtOptions jwtOptions = jwtOptions.Value;
+    private readonly JwtOptions _jwtOptions = jwtOptions.Value;
+    private readonly TimeProvider _timeProvider = timeProvider;
 
     public (string token, DateTime expiresAtUtc) GenerateToken(User user)
     {
-        SymmetricSecurityKey securityKey = new(Encoding.UTF8.GetBytes(jwtOptions.SigningKey));
+        SymmetricSecurityKey securityKey = new(Encoding.UTF8.GetBytes(_jwtOptions.SigningKey));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-        var expiresAtUtc = DateTime.UtcNow.AddMinutes(jwtOptions.AccessTokenMinutes);
+        DateTime expiresAtUtc = _timeProvider.GetUtcNow()
+            .AddMinutes(_jwtOptions.AccessTokenMinutes)
+            .UtcDateTime;
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -28,8 +31,8 @@ public class TokenService(IOptions<JwtOptions> jwtOptions) : ITokenService
             new("email_confirmed", user.EmailConfirmed.ToString())
         };
         var token = new JwtSecurityToken(
-            issuer: jwtOptions.Issuer,
-            audience: jwtOptions.Audience,
+            issuer: _jwtOptions.Issuer,
+            audience: _jwtOptions.Audience,
             claims: claims,
             expires: expiresAtUtc,
             signingCredentials: credentials
@@ -42,10 +45,11 @@ public class TokenService(IOptions<JwtOptions> jwtOptions) : ITokenService
         var bytes = RandomNumberGenerator.GetBytes(64);
         var rawToken = Convert.ToBase64String(bytes);
         var hashedToken = ComputeHash(rawToken);
+        DateTimeOffset expiresAt = _timeProvider.GetUtcNow().AddDays(_jwtOptions.RefreshTokenDays);
         return new RefreshTokenGeneratedDTO
         {
             RawToken = rawToken,
-            ExpiresAtUtc = DateTime.UtcNow.AddDays(jwtOptions.RefreshTokenDays),
+            ExpiresAtUtc = expiresAt.UtcDateTime,
             HashedToken = hashedToken
         };
     }
