@@ -136,7 +136,7 @@ public class TeamAuthorizationServiceTests : IDisposable
 
         // Assert
         Assert.IsNull(role);
-        _memoryCacheMock.Verify(mc => mc.CreateEntry(cacheKey), Times.Never);
+        _memoryCacheMock.Verify(mc => mc.CreateEntry(cacheKey), Times.Never());
     }
 
     [TestMethod]
@@ -176,6 +176,6 @@ public class TeamAuthorizationServiceTests : IDisposable
 
         // Assert
         Assert.IsNotNull(role);
-        _memoryCacheMock.Verify(mc => mc.CreateEntry(cacheKey), Times.Never);
+        _memoryCacheMock.Verify(mc => mc.CreateEntry(cacheKey), Times.Never());
     }
 }
