@@ -1,5 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 using DevStack.Application.BoardForge.Interfaces;
 using DevStack.Domain.BoardForge.Entities;
 using DevStack.Infrastructure.BoardForge.Models;
@@ -140,5 +142,40 @@ public class TokenServiceTests
 
         var jwtToken = tokenHandler.ReadJwtToken(tokenString);
         Assert.AreEqual(fakeNow.AddMinutes(_jwtOptions.AccessTokenMinutes), jwtToken.ValidTo);
+    }
+
+    [TestMethod]
+    public void GenerateRefreshToken_Should_ReturnValidToken()
+    {
+        // Arrange
+        DateTime fakeNow = new(2025, 9, 11, 1, 49, 0, DateTimeKind.Utc);
+        fakeTimeProvider.SetUtcNow(fakeNow);
+
+        // Act
+        var refreshToken = _service.GenerateRefreshToken();
+
+        // Assert
+        Assert.IsNotNull(refreshToken);
+        Assert.IsFalse(string.IsNullOrEmpty(refreshToken.RawToken));
+        Assert.IsFalse(string.IsNullOrEmpty(refreshToken.HashedToken));
+        Assert.AreEqual(fakeNow.AddDays(_jwtOptions.RefreshTokenDays), refreshToken.ExpiresAtUtc);
+    }
+
+    [TestMethod]
+    public void ComputeHash_Should_ReturnConsistentHash()
+    {
+        // Arrange
+        string rawToken = "sample_raw_token";
+        string expectedHash = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(rawToken)));
+
+        // Act
+        string computedHash = _service.ComputeHash(rawToken);
+        string recomputedHash = _service.ComputeHash(rawToken);
+        string differentHash = _service.ComputeHash("different_raw_token");
+
+        // Assert
+        Assert.AreEqual(expectedHash, computedHash);
+        Assert.AreEqual(expectedHash, recomputedHash);
+        Assert.AreNotEqual(expectedHash, differentHash);
     }
 }
