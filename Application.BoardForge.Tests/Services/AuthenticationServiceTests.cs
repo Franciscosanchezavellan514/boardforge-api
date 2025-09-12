@@ -201,7 +201,7 @@ public class AuthenticationServiceTests
     {
         // Arrange
         AuthenticateUserRequest request = CreateAuthenticateUserRequest();
-        AuthenticateAsyncSetupHappyPath(request, out User user, out RefreshToken expectedRefreshToken);
+        AuthenticateAsyncSetupHappyPath(request, out User user, out RefreshToken _);
         // Act
         await _authenticationService.AuthenticateAsync(request);
 
@@ -250,7 +250,6 @@ public class AuthenticationServiceTests
 
     private void AuthenticateAsyncSetupHappyPath(AuthenticateUserRequest request, out User user, out RefreshToken refreshToken)
     {
-        request = CreateAuthenticateUserRequest();
         user = new()
         {
             Id = 1,
