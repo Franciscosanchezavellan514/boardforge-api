@@ -1,4 +1,5 @@
 {
+    "omnisharp.testRunSettings": "coverlet.runsettings",
     "dotnet.unitTests.runSettingsPath": "coverlet.runsettings",
     "dotnet.testWindow.useTestingPlatformProtocol": true,
     "dotnet.unitTests.enableCodeCoverage": true
