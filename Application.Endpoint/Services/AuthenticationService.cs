@@ -7,11 +7,16 @@ using DevStack.Domain.BoardForge.Interfaces.Repositories;
 
 namespace DevStack.Application.BoardForge.Services;
 
-public class AuthenticationService(IUnitOfWork unitOfWork, ITokenService tokenService, IPasswordHasher passwordHasher) : IAuthenticationService
+public class AuthenticationService(
+    IUnitOfWork unitOfWork,
+    ITokenService tokenService,
+    IPasswordHasher passwordHasher,
+    TimeProvider timeProvider) : IAuthenticationService
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly ITokenService _tokenService = tokenService;
     private readonly IPasswordHasher _passwordHasher = passwordHasher;
+    private readonly TimeProvider _timeProvider = timeProvider;
 
     public async Task<TokenResponseDTO> AuthenticateAsync(AuthenticateUserRequest request)
     {
@@ -37,7 +42,7 @@ public class AuthenticationService(IUnitOfWork unitOfWork, ITokenService tokenSe
             UserAgent = request.UserAgent,
             DeviceName = request.DeviceName,
             ExpiresAtUtc = refreshTokenDto.ExpiresAtUtc,
-            CreatedAtUtc = DateTime.UtcNow,
+            CreatedAtUtc = _timeProvider.GetUtcNow().UtcDateTime,
         };
 
         await _unitOfWork.RefreshTokens.AddAsync(refreshToken);
@@ -82,10 +87,10 @@ public class AuthenticationService(IUnitOfWork unitOfWork, ITokenService tokenSe
             UserAgent = request.UserAgent,
             DeviceName = request.DeviceName,
             ExpiresAtUtc = newRefreshTokenDto.ExpiresAtUtc,
-            CreatedAtUtc = DateTime.UtcNow,
+            CreatedAtUtc = _timeProvider.GetUtcNow().UtcDateTime,
         };
 
-        existingToken.RevokedAtUtc = DateTime.UtcNow;
+        existingToken.RevokedAtUtc = _timeProvider.GetUtcNow().UtcDateTime;
         await _unitOfWork.RefreshTokens.UpdateAsync(existingToken);
         await _unitOfWork.RefreshTokens.AddAsync(newRefreshToken);
         await _unitOfWork.SaveChangesAsync();
@@ -118,7 +123,7 @@ public class AuthenticationService(IUnitOfWork unitOfWork, ITokenService tokenSe
             PasswordHash = hashedPassword,
             DisplayName = email.Split('@')[0].ToLower().Trim(),
             Salt = Convert.ToBase64String(salt),
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = _timeProvider.GetUtcNow().UtcDateTime,
             IsActive = true,
             EmailConfirmed = false,
         };
