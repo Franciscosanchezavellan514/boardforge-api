@@ -13,11 +13,6 @@ public class AuthenticationService(
     IPasswordHasher passwordHasher,
     TimeProvider timeProvider) : IAuthenticationService
 {
-    private readonly IUnitOfWork _unitOfWork = unitOfWork;
-    private readonly ITokenService _tokenService = tokenService;
-    private readonly IPasswordHasher _passwordHasher = passwordHasher;
-    private readonly TimeProvider _timeProvider = timeProvider;
-
     public async Task<TokenResponseDTO> AuthenticateAsync(AuthenticateUserRequest request)
     {
         string email = request.Email;
@@ -26,14 +21,14 @@ public class AuthenticationService(
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             throw new ArgumentException("Email and password must be provided.");
 
-        var user = await _unitOfWork.Users.GetByEmailAsync(email.ToLower().Trim());
-        if (user == null || !_passwordHasher.VerifyHashedPassword(user.PasswordHash, password, Convert.FromBase64String(user.Salt)))
+        var user = await unitOfWork.Users.GetByEmailAsync(email.ToLower().Trim());
+        if (user == null || !passwordHasher.VerifyHashedPassword(user.PasswordHash, password, Convert.FromBase64String(user.Salt)))
         {
             throw new UnauthorizedAccessException("Invalid email or password.");
         }
 
-        (string token, DateTime expiresAtUtc) = _tokenService.GenerateToken(user);
-        RefreshTokenGeneratedDTO refreshTokenDto = _tokenService.GenerateRefreshToken();
+        (string token, DateTime expiresAtUtc) = tokenService.GenerateToken(user);
+        RefreshTokenGeneratedDTO refreshTokenDto = tokenService.GenerateRefreshToken();
         RefreshToken refreshToken = new()
         {
             TokenHash = refreshTokenDto.HashedToken,
@@ -42,11 +37,11 @@ public class AuthenticationService(
             UserAgent = request.UserAgent,
             DeviceName = request.DeviceName,
             ExpiresAtUtc = refreshTokenDto.ExpiresAtUtc,
-            CreatedAtUtc = _timeProvider.GetUtcNow().UtcDateTime,
+            CreatedAtUtc = timeProvider.GetUtcNow().UtcDateTime,
         };
 
-        await _unitOfWork.RefreshTokens.AddAsync(refreshToken);
-        await _unitOfWork.SaveChangesAsync();
+        await unitOfWork.RefreshTokens.AddAsync(refreshToken);
+        await unitOfWork.SaveChangesAsync();
 
         return new TokenResponseDTO
         {
@@ -59,8 +54,8 @@ public class AuthenticationService(
 
     public async Task<TokenResponseDTO> RefreshTokenAsync(RefreshTokenDetailRequest request)
     {
-        var hashedToken = _tokenService.ComputeHash(request.RefreshToken);
-        var existingToken = await _unitOfWork.RefreshTokens.GetByTokenAsync(hashedToken);
+        var hashedToken = tokenService.ComputeHash(request.RefreshToken);
+        var existingToken = await unitOfWork.RefreshTokens.GetByTokenAsync(hashedToken);
         if (existingToken == null)
         {
             throw new UnauthorizedAccessException("Invalid refresh token.");
@@ -71,14 +66,14 @@ public class AuthenticationService(
             throw new UnauthorizedAccessException("Refresh token is expired or revoked.");
         }
 
-        var user = await _unitOfWork.Users.GetByIdAsync(existingToken.UserId);
+        var user = await unitOfWork.Users.GetByIdAsync(existingToken.UserId);
         if (user == null)
         {
             throw new EntityNotFoundException("User not found.");
         }
 
-        (string token, DateTime expiresAtUtc) = _tokenService.GenerateToken(user);
-        RefreshTokenGeneratedDTO newRefreshTokenDto = _tokenService.GenerateRefreshToken();
+        (string token, DateTime expiresAtUtc) = tokenService.GenerateToken(user);
+        RefreshTokenGeneratedDTO newRefreshTokenDto = tokenService.GenerateRefreshToken();
         RefreshToken newRefreshToken = new()
         {
             TokenHash = newRefreshTokenDto.HashedToken,
@@ -87,13 +82,13 @@ public class AuthenticationService(
             UserAgent = request.UserAgent,
             DeviceName = request.DeviceName,
             ExpiresAtUtc = newRefreshTokenDto.ExpiresAtUtc,
-            CreatedAtUtc = _timeProvider.GetUtcNow().UtcDateTime,
+            CreatedAtUtc = timeProvider.GetUtcNow().UtcDateTime,
         };
 
-        existingToken.RevokedAtUtc = _timeProvider.GetUtcNow().UtcDateTime;
-        await _unitOfWork.RefreshTokens.UpdateAsync(existingToken);
-        await _unitOfWork.RefreshTokens.AddAsync(newRefreshToken);
-        await _unitOfWork.SaveChangesAsync();
+        existingToken.RevokedAtUtc = timeProvider.GetUtcNow().UtcDateTime;
+        await unitOfWork.RefreshTokens.UpdateAsync(existingToken);
+        await unitOfWork.RefreshTokens.AddAsync(newRefreshToken);
+        await unitOfWork.SaveChangesAsync();
 
         return new TokenResponseDTO
         {
@@ -112,10 +107,10 @@ public class AuthenticationService(
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             throw new ArgumentException("Email and password must be provided.");
 
-        var existingUser = await _unitOfWork.Users.GetByEmailAsync(email);
+        var existingUser = await unitOfWork.Users.GetByEmailAsync(email);
         if (existingUser != null) throw new InvalidOperationException("A user with this email already exists.");
 
-        (string hashedPassword, byte[] salt) = _passwordHasher.HashPassword(password);
+        (string hashedPassword, byte[] salt) = passwordHasher.HashPassword(password);
 
         User newUser = new()
         {
@@ -123,13 +118,13 @@ public class AuthenticationService(
             PasswordHash = hashedPassword,
             DisplayName = email.Split('@')[0].ToLower().Trim(),
             Salt = Convert.ToBase64String(salt),
-            CreatedAt = _timeProvider.GetUtcNow().UtcDateTime,
+            CreatedAt = timeProvider.GetUtcNow().UtcDateTime,
             IsActive = true,
             EmailConfirmed = false,
         };
 
-        await _unitOfWork.Users.AddAsync(newUser);
-        await _unitOfWork.SaveChangesAsync();
+        await unitOfWork.Users.AddAsync(newUser);
+        await unitOfWork.SaveChangesAsync();
 
         return new UserResponse
         {
