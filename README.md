@@ -67,3 +67,9 @@ dotnet ef --startup-project .\BoardForgeAPI\ migrations add {{MigrationName}} --
 ```bash
 dotnet ef --startup-project .\BoardForgeAPI\ database update --project .\Infrastructure.BoardForge
 ```
+
+### Run tests with coverage
+```bash
+# dotnet test --settings coverlet.runsettings /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
+dotnet test --settings .\coverlet.runsettings --collect:"XPlat Code Coverage"
+```
