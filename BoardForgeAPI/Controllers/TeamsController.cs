@@ -2,9 +2,9 @@
 using DevStack.Application.BoardForge.DTOs.Response;
 using DevStack.Application.BoardForge.Interfaces;
 using DevStack.BoardForgeAPI.Authorization;
+using DevStack.BoardForgeAPI.Exceptions;
 using DevStack.BoardForgeAPI.Models;
 using DevStack.Domain.BoardForge.Entities;
-using DevStack.Infrastructure.BoardForge.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -123,5 +123,20 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
         var baseRequest = new BaseRequest<RemoveTeamMemberRequest>(teamId, CurrentUserId, new RemoveTeamMemberRequest(userId));
         TeamMembershipResponse response = await _teamsService.RemoveMemberAsync(baseRequest);
         return Ok(response);
+    }
+
+    [HttpPost("{teamId:int}/labels")]
+    [ProducesResponseType<IEnumerable<TeamLabelResponse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(HttpErrorResponse))]
+    [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(HttpErrorResponse))]
+    public async Task<IActionResult> AddTeamLabels(int teamId, [FromBody] IEnumerable<AddTeamLabelRequest> requests)
+    {
+        var ownerRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Owner);
+        var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(teamId), ownerRequirement);
+        if (!auth.Succeeded) throw new ForbiddenException();
+
+        var baseRequest = new BaseRequest<IEnumerable<AddTeamLabelRequest>>(teamId, CurrentUserId, requests);
+        IEnumerable<TeamLabelResponse> labels = await _teamsService.AddTeamLabels(baseRequest);
+        return Ok(labels);
     }
 }
