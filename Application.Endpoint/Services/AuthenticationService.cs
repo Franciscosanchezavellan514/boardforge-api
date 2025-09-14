@@ -107,7 +107,7 @@ public class AuthenticationService(
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             throw new ArgumentException("Email and password must be provided.");
 
-        var existingUser = await unitOfWork.Users.GetByEmailAsync(email);
+        var existingUser = await unitOfWork.Users.GetByEmailAsync(email.ToLower().Trim());
         if (existingUser != null) throw new InvalidOperationException("A user with this email already exists.");
 
         (string hashedPassword, byte[] salt) = passwordHasher.HashPassword(password);
