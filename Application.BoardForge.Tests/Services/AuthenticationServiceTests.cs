@@ -563,5 +563,105 @@ public class AuthenticationServiceTests
 
     #endregion RefreshTokenAsync Tests
 
-    
+    #region RegisterAsync Tests
+
+    [TestMethod]
+    [DataRow(null)]
+    [DataRow("")]
+    [DataRow("   ")]
+    public async Task RegisterAsync__ShouldThrow_ArgumentException_WhenEmailIsNullOrEmpty(string email)
+    {
+        // Arrange
+        var request = new AuthenticateUserRequest
+        {
+            Email = email,
+            Password = "ValidPassword123!"
+        };
+
+        // Act
+        Task act() => _authenticationService.RegisterAsync(request);
+
+        // Assert
+        await Assert.ThrowsExceptionAsync<ArgumentException>(act);
+    }
+
+    [TestMethod]
+    [DataRow(null)]
+    [DataRow("")]
+    [DataRow("   ")]
+    public async Task RegisterAsync__ShouldThrow_ArgumentException_WhenPasswordIsNullOrEmpty(string password)
+    {
+        // Arrange
+        var request = new AuthenticateUserRequest
+        {
+            Email = "user@example.com",
+            Password = password
+        };
+
+        // Act
+        Task act() => _authenticationService.RegisterAsync(request);
+
+        // Assert
+        await Assert.ThrowsExceptionAsync<ArgumentException>(act);
+    }
+
+    [TestMethod]
+    public async Task RegisterAsync__ShouldThrow_InvalidOperationException_WhenEmailAlreadyExists()
+    {
+        // Arrange
+        var request = new AuthenticateUserRequest
+        {
+            Email = "user@example.com",
+            Password = "ValidPassword123!"
+        };
+        _unitOfWorkMock.Setup(u => u.Users.GetByEmailAsync(It.IsAny<string>())).ReturnsAsync(new User());
+        // Act
+        Task act() => _authenticationService.RegisterAsync(request);
+
+        // Assert
+        await Assert.ThrowsExceptionAsync<InvalidOperationException>(act);
+        _unitOfWorkMock.Verify(u => u.Users.GetByEmailAsync(request.Email.ToLower().Trim()), Times.Once);
+    }
+
+    [TestMethod]
+    [DataRow("user@example.com")]
+    [DataRow("USER2@ExaMplE.com    ")]
+    [DataRow("   USER.Test@example.COM")]
+    [DataRow("   User.Test@Example.Com    ")]
+    public async Task RegisterAsync__Should_CreateANewUser_WhenEmailDoesNotExist(string email)
+    {
+        // Arrange
+        var request = new AuthenticateUserRequest
+        {
+            Email = email,
+            Password = "ValidPassword123!"
+        };
+        var currentTime = DateTimeOffset.UtcNow;
+        string normalizedEmail = email.ToLower().Trim();
+        string displayName = normalizedEmail.Split('@')[0];
+        _unitOfWorkMock.Setup(u => u.Users.GetByEmailAsync(It.IsAny<string>())).ReturnsAsync((User?)null);
+        _passwordHasherMock.Setup(p => p.HashPassword(It.IsAny<string>())).Returns(("hashedPassword", new byte[] { 1, 2, 3, 4 }));
+        _unitOfWorkMock.Setup(u => u.Users.AddAsync(It.IsAny<User>())).ReturnsAsync(new User());
+        _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
+        _fakeTimeProvider.SetUtcNow(currentTime);
+
+        // Act
+        await _authenticationService.RegisterAsync(request);
+
+        // Assert
+        _unitOfWorkMock.Verify(u => u.Users.GetByEmailAsync(normalizedEmail), Times.Once);
+        _passwordHasherMock.Verify(p => p.HashPassword(request.Password), Times.Once);
+        _unitOfWorkMock.Verify(u => u.Users.AddAsync(It.Is<User>(user =>
+            user.Email == normalizedEmail &&
+            user.PasswordHash == "hashedPassword" &&
+            user.Salt == Convert.ToBase64String(new byte[] { 1, 2, 3, 4 }) &&
+            user.CreatedAt == currentTime.UtcDateTime &&
+            !user.EmailConfirmed &&
+            user.DisplayName == displayName &&
+            user.IsActive == true
+        )), Times.Once);
+        _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once);
+    }
+
+    #endregion RegisterAsync Tests
 }
