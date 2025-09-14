@@ -149,6 +149,7 @@ public class BoardForgeDbContext : DbContext
                   .HasForeignKey(e => e.TeamId)
                   .OnDelete(DeleteBehavior.Cascade);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.HasIndex(e => new { e.TeamId, e.NormalizedName }).IsUnique();
         });
 
         modelBuilder.Entity<CardLabel>(entity =>
