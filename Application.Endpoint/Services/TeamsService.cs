@@ -1,16 +1,20 @@
+using System.Diagnostics.SymbolStore;
 using DevStack.Application.BoardForge.DTOs.Request;
 using DevStack.Application.BoardForge.DTOs.Response;
 using DevStack.Application.BoardForge.Interfaces;
 using DevStack.Domain.BoardForge.Entities;
 using DevStack.Domain.BoardForge.Exceptions;
 using DevStack.Domain.BoardForge.Interfaces.Repositories;
+using DevStack.Domain.BoardForge.Interfaces.Services;
 using DevStack.Domain.BoardForge.Specifications;
 
 namespace DevStack.Application.BoardForge.Services;
 
-public class TeamsService(IUnitOfWork unitOfWork) : ITeamsService
+public class TeamsService(IUnitOfWork unitOfWork, TimeProvider timeProvider, IStringUtilsService stringUtils) : ITeamsService
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly TimeProvider _timeProvider = timeProvider;
+    private readonly IStringUtilsService _stringUtils = stringUtils;
 
     public async Task<TeamMembershipResponse> AddMemberAsync(BaseRequest<AddTeamMemberRequest> request)
     {
@@ -123,6 +127,46 @@ public class TeamsService(IUnitOfWork unitOfWork) : ITeamsService
         await _unitOfWork.SaveChangesAsync();
 
         return new TeamResponse(team.Id, team.Name, team.Description, team.TeamMemberships.Count);
+    }
+
+    public async Task<IEnumerable<TeamLabelResponse>> AddTeamLabels(BaseRequest<IEnumerable<AddTeamLabelRequest>> request)
+    {
+        if (request.ObjectId is null) throw new ArgumentNullException("ObjectId is required");
+        if (!request.Data.Any()) throw new ArgumentException("At least one value must be provided");
+
+        IEnumerable<Label> labels = request.Data.Select(l => MapRequestToLabel(l, request));
+        List<Label> storedLabels = await _unitOfWork.Labels.AddAsync(labels);
+
+        return storedLabels.Select(MapEntityToLabelResponse);
+    }
+
+    private Label MapRequestToLabel<T>(T labelRequest, BaseRequest<IEnumerable<T>> request) where T : AddTeamLabelRequest
+    {
+        string normalizedName = _stringUtils.NormalizeAndReplaceWhitespaces(labelRequest.Name, '_');
+        string color = string.IsNullOrWhiteSpace(labelRequest.Color)
+            ? _stringUtils.GetColorFromChar(labelRequest.Name[0]) 
+            : labelRequest.Color;
+        return new Label
+        {
+            Name = labelRequest.Name,
+            ColorHex = color,
+            NormalizedName = normalizedName,
+            CreatedAt = _timeProvider.GetUtcNow().UtcDateTime,
+            IsActive = true,
+            CreatedBy = request.UserId,
+            TeamId = request.ObjectId!.Value
+        };
+    }
+
+    private TeamLabelResponse MapEntityToLabelResponse(Label label)
+    {
+        return new TeamLabelResponse(
+            label.Name,
+            label.NormalizedName,
+            label.ColorHex,
+            label.CreatedAt,
+            label.UpdatedAt
+            );
     }
 
     public async Task<TeamMembershipResponse> RemoveMemberAsync(BaseRequest<RemoveTeamMemberRequest> request)
