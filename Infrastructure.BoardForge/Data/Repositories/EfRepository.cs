@@ -20,10 +20,10 @@ public class EfRepository<TEntity> : IAsyncRepository<TEntity> where TEntity : B
         return entity;
     }
 
-    public async Task<List<TEntity>> AddAsync(List<TEntity> entities)
+    public async Task<List<TEntity>> AddAsync(IEnumerable<TEntity> entities)
     {
         await _dbContext.Set<TEntity>().AddRangeAsync(entities);
-        return entities;
+        return entities.ToList();
     }
 
     public Task DeleteAsync(TEntity entity)
@@ -32,10 +32,10 @@ public class EfRepository<TEntity> : IAsyncRepository<TEntity> where TEntity : B
         return Task.CompletedTask;
     }
 
-    public Task<List<TEntity>> DeleteAsync(List<TEntity> entities)
+    public Task<List<TEntity>> DeleteAsync(IEnumerable<TEntity> entities)
     {
         _dbContext.Set<TEntity>().RemoveRange(entities);
-        return Task.FromResult(entities);
+        return Task.FromResult(entities.ToList());
     }
 
     public async Task<TEntity?> GetByIdAsync(int id)
@@ -54,10 +54,10 @@ public class EfRepository<TEntity> : IAsyncRepository<TEntity> where TEntity : B
         return Task.CompletedTask;
     }
 
-    public Task<List<TEntity>> UpdateAsync(List<TEntity> entities)
+    public Task<List<TEntity>> UpdateAsync(IEnumerable<TEntity> entities)
     {
         _dbContext.Set<TEntity>().UpdateRange(entities);
-        return Task.FromResult(entities);
+        return Task.FromResult(entities.ToList());
     }
 
     public async Task<int> SaveChangesAsync()

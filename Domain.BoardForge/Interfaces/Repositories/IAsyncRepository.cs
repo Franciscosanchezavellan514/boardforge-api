@@ -10,9 +10,9 @@ public interface IAsyncRepository<TEntity> where TEntity : BaseEntity
     Task UpdateAsync(TEntity entity);
     Task DeleteAsync(TEntity entity);
     Task<bool> ExistsAsync(int id);
-    Task<List<TEntity>> AddAsync(List<TEntity> entity);
-    Task<List<TEntity>> DeleteAsync(List<TEntity> entity);
-    Task<List<TEntity>> UpdateAsync(List<TEntity> entity);
+    Task<List<TEntity>> AddAsync(IEnumerable<TEntity> entity);
+    Task<List<TEntity>> DeleteAsync(IEnumerable<TEntity> entity);
+    Task<List<TEntity>> UpdateAsync(IEnumerable<TEntity> entity);
     public Task<int> SaveChangesAsync();
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 
