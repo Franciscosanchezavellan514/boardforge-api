@@ -1,4 +1,3 @@
-using System.Diagnostics.SymbolStore;
 using DevStack.Application.BoardForge.DTOs.Request;
 using DevStack.Application.BoardForge.DTOs.Response;
 using DevStack.Application.BoardForge.Interfaces;
@@ -129,22 +128,51 @@ public class TeamsService(IUnitOfWork unitOfWork, TimeProvider timeProvider, ISt
         return new TeamResponse(team.Id, team.Name, team.Description, team.TeamMemberships.Count);
     }
 
-    public async Task<IEnumerable<TeamLabelResponse>> AddTeamLabels(BaseRequest<IEnumerable<AddTeamLabelRequest>> request)
+    public async Task<TeamLabelOperationResponse> AddLabels(BaseRequest<IEnumerable<AddTeamLabelRequest>> request)
     {
         if (request.ObjectId is null) throw new ArgumentNullException("ObjectId is required");
         if (!request.Data.Any()) throw new ArgumentException("At least one value must be provided");
 
-        IEnumerable<Label> labels = request.Data.Select(l => MapRequestToLabel(l, request));
-        List<Label> storedLabels = await _unitOfWork.Labels.AddAsync(labels);
+        List<Label> labels = request.Data.Select(l => MapRequestToLabel(l, request)).ToList();
+        bool containsDuplicates = labels.GroupBy(l => l.NormalizedName).Any(g => g.Count() > 1);
+        if (containsDuplicates) throw new ArgumentException("Duplicate label names found in request");
 
-        return storedLabels.Select(MapEntityToLabelResponse);
+        var query = new GetLabelsByTeamAndNamesSpecification(request.ObjectId.Value, labels.Select(l => l.NormalizedName));
+        IReadOnlyList<Label> existingLabels = await _unitOfWork.Labels.ListAsync(query);
+        if (existingLabels.Any())
+        {
+            List<string> normalizedNames = existingLabels.Select(el => el.NormalizedName).ToList();
+            IEnumerable<Label> filteredLabels = labels.Where(l => !normalizedNames.Contains(l.NormalizedName));
+            var savedLabels = await _unitOfWork.Labels.AddAsync(filteredLabels);
+            await _unitOfWork.Labels.SaveChangesAsync();
+            return new TeamLabelOperationResponse(
+                savedLabels.Select(MapEntityToLabelResponse),
+                existingLabels.Select(MapEntityToLabelResponse)
+                );
+        }
+
+        List<Label> storedLabels = await _unitOfWork.Labels.AddAsync(labels);
+        await _unitOfWork.Labels.SaveChangesAsync();
+
+        return new TeamLabelOperationResponse(storedLabels.Select(MapEntityToLabelResponse), []);
+    }
+
+    public async Task<IEnumerable<TeamLabelResponse>> GetLabelsAsync(int teamId)
+    {
+        if (teamId <= 0) throw new ArgumentException("Invalid team ID");
+        if (!await _unitOfWork.Teams.ExistsAsync(teamId))
+            throw new EntityNotFoundException($"Team with ID {teamId} not found");
+
+        IReadOnlyList<Label> labels = await _unitOfWork.Labels.ListAsync(new GetLabelsByTeamSpecification(teamId));
+
+        return labels.Select(MapEntityToLabelResponse);
     }
 
     private Label MapRequestToLabel<T>(T labelRequest, BaseRequest<IEnumerable<T>> request) where T : AddTeamLabelRequest
     {
         string normalizedName = _stringUtils.NormalizeAndReplaceWhitespaces(labelRequest.Name, '_');
         string color = string.IsNullOrWhiteSpace(labelRequest.Color)
-            ? _stringUtils.GetColorFromChar(labelRequest.Name[0]) 
+            ? _stringUtils.GetColorFromChar(labelRequest.Name[0])
             : labelRequest.Color;
         return new Label
         {
@@ -161,6 +189,7 @@ public class TeamsService(IUnitOfWork unitOfWork, TimeProvider timeProvider, ISt
     private TeamLabelResponse MapEntityToLabelResponse(Label label)
     {
         return new TeamLabelResponse(
+            label.Id,
             label.Name,
             label.NormalizedName,
             label.ColorHex,
