@@ -6,6 +6,8 @@ public class Label : AuditableEntity, ITeamResource
 {
     [Required, MaxLength(100)]
     public string Name { get; set; } = string.Empty;
+    [Required, MaxLength(100)]
+    public string NormalizedName { get; set; } = string.Empty;
     [Required]
     public int TeamId { get; set; }
     public Team? Team { get; set; }

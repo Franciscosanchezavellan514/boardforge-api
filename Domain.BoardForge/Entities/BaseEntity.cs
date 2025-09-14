@@ -30,5 +30,5 @@ public abstract class SoftDeletableEntity : AuditableEntity
 public abstract class VersionedEntity : SoftDeletableEntity
 {
     [Timestamp]
-    public byte[] RowVersion { get; set; } = Array.Empty<byte>();
+    public byte[] RowVersion { get; set; } = [];
 }
