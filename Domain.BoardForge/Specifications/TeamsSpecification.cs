@@ -50,3 +50,20 @@ public sealed class GetTeamMembershipsByTeamSpecification : BaseSpecification<Te
         AddInclude(tm => tm.User!);
     }
 }
+
+public sealed class GetLabelsByTeamSpecification : BaseSpecification<Label>
+{
+    public GetLabelsByTeamSpecification(int teamId)
+    {
+        ApplyCriteria(c => c.TeamId.Equals(teamId));
+        ApplyOrderBy(order => order.Name);
+    }
+}
+
+public sealed class GetLabelsByTeamAndNamesSpecification : BaseSpecification<Label>
+{
+    public GetLabelsByTeamAndNamesSpecification(int teamId, IEnumerable<string> normalizedNames)
+    {
+        ApplyCriteria(c => c.TeamId.Equals(teamId) && normalizedNames.Contains(c.NormalizedName));
+    }
+}
