@@ -13,5 +13,6 @@ public interface ITeamsService
     Task<TeamMembershipResponse> RemoveMemberAsync(BaseRequest<RemoveTeamMemberRequest> request);
     Task<IEnumerable<TeamMembersResponse>> ListMembersAsync(int teamId);
     Task<TeamResponse> SoftDeleteAsync(BaseRequest request);
-    Task<IEnumerable<TeamLabelResponse>> AddTeamLabels(BaseRequest<IEnumerable<AddTeamLabelRequest>> request);
+    Task<TeamLabelOperationResponse> AddLabels(BaseRequest<IEnumerable<AddTeamLabelRequest>> request);
+    Task<IEnumerable<TeamLabelResponse>> GetLabelsAsync(int teamId);
 }
