@@ -9,6 +9,7 @@ public interface IUnitOfWork
     // Add other repositories here
     IAsyncRepository<Team> Teams { get; }
     IAsyncRepository<TeamMembership> TeamMemberships { get; }
+    IAsyncRepository<Label> Labels { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     Task<int> SaveChangesAsync();
 }
