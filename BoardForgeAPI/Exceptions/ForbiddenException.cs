@@ -1,4 +1,4 @@
-namespace DevStack.Infrastructure.BoardForge.Exceptions;
+namespace DevStack.BoardForgeAPI.Exceptions;
 
 public class ForbiddenException : Exception
 {

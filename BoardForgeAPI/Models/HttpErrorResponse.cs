@@ -1,6 +1,6 @@
 using System.Net;
+using DevStack.BoardForgeAPI.Exceptions;
 using DevStack.Domain.BoardForge.Exceptions;
-using DevStack.Infrastructure.BoardForge.Exceptions;
 
 namespace DevStack.BoardForgeAPI.Models;
 
