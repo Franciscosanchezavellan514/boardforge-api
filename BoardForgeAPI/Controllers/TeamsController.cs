@@ -125,8 +125,21 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
         return Ok(response);
     }
 
-    [HttpPost("{teamId:int}/labels")]
+    [HttpGet("{teamId:int}/labels")]
     [ProducesResponseType<IEnumerable<TeamLabelResponse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(HttpErrorResponse))]
+    public async Task<IActionResult> GetTeamLabels(int teamId)
+    {
+        var ownerRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Owner);
+        var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(teamId), ownerRequirement);
+        if (!auth.Succeeded) throw new ForbiddenException();
+
+        IEnumerable<TeamLabelResponse> labels = await _teamsService.GetLabelsAsync(teamId);
+        return Ok(labels);
+    }
+
+    [HttpPost("{teamId:int}/labels")]
+    [ProducesResponseType<TeamLabelOperationResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(HttpErrorResponse))]
     [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(HttpErrorResponse))]
     public async Task<IActionResult> AddTeamLabels(int teamId, [FromBody] IEnumerable<AddTeamLabelRequest> requests)
@@ -136,7 +149,7 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
         if (!auth.Succeeded) throw new ForbiddenException();
 
         var baseRequest = new BaseRequest<IEnumerable<AddTeamLabelRequest>>(teamId, CurrentUserId, requests);
-        IEnumerable<TeamLabelResponse> labels = await _teamsService.AddTeamLabels(baseRequest);
+        TeamLabelOperationResponse labels = await _teamsService.AddLabels(baseRequest);
         return Ok(labels);
     }
 }
