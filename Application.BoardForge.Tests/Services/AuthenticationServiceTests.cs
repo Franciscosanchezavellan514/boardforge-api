@@ -3,6 +3,7 @@ using DevStack.Application.BoardForge.DTOs.Response;
 using DevStack.Application.BoardForge.Interfaces;
 using DevStack.Application.BoardForge.Services;
 using DevStack.Domain.BoardForge.Entities;
+using DevStack.Domain.BoardForge.Exceptions;
 using DevStack.Domain.BoardForge.Interfaces.Repositories;
 using Microsoft.Extensions.Time.Testing;
 using Moq;
@@ -48,6 +49,8 @@ public class AuthenticationServiceTests
         IpAddress = "127.0.0.1",
         UserAgent = "UnitTestAgent"
     };
+
+    #region AuthenticateAsync Tests
 
     [TestMethod]
     [DataRow(null)]
@@ -288,4 +291,277 @@ public class AuthenticationServiceTests
             CreatedAtUtc = currentTime.UtcDateTime
         };
     }
+
+    #endregion AuthenticateAsync Tests
+
+    #region RefreshTokenAsync Tests
+
+    [TestMethod]
+    public async Task RefreshTokenAsync__ShouldThrow_UnauthorizedAccessException_WhenRefreshTokenIsNotFound()
+    {
+        // Arrange
+        string refreshToken = "someRefreshToken";
+        _tokenServiceMock.Setup(t => t.ComputeHash(It.IsAny<string>())).Returns("hashedRefreshToken");
+        _unitOfWorkMock.Setup(u => u.RefreshTokens.GetByTokenAsync(It.IsAny<string>())).ReturnsAsync((RefreshToken?)null);
+        RefreshTokenDetailRequest request = new(refreshToken, "127.0.0.1", "UnitTestAgent", "UnitTestDevice");
+
+        // Act
+        Task act() => _authenticationService.RefreshTokenAsync(request);
+
+        // Assert
+        await Assert.ThrowsExceptionAsync<UnauthorizedAccessException>(act);
+        _tokenServiceMock.Verify(t => t.ComputeHash(refreshToken), Times.Once);
+        _unitOfWorkMock.Verify(u => u.RefreshTokens.GetByTokenAsync("hashedRefreshToken"), Times.Once);
+    }
+
+
+    [TestMethod]
+    public async Task RefreshTokenAsync__ShouldThrow_UnauthorizedAccessException_WhenRefreshTokenIsRevoked()
+    {
+        // Arrange
+        string refreshToken = "someRefreshToken";
+        _tokenServiceMock.Setup(t => t.ComputeHash(It.IsAny<string>())).Returns("hashedRefreshToken");
+        RefreshTokenDetailRequest request = new(refreshToken, "127.0.0.1", "UnitTestAgent", "UnitTestDevice");
+        RefreshToken storedToken = new()
+        {
+            RevokedAtUtc = DateTime.UtcNow.AddDays(5),
+        };
+        _unitOfWorkMock.Setup(u => u.RefreshTokens.GetByTokenAsync(It.IsAny<string>())).ReturnsAsync(storedToken);
+
+        // Act
+        Task act() => _authenticationService.RefreshTokenAsync(request);
+
+        // Assert
+        await Assert.ThrowsExceptionAsync<UnauthorizedAccessException>(act);
+        _tokenServiceMock.Verify(t => t.ComputeHash(refreshToken), Times.Once);
+        _unitOfWorkMock.Verify(u => u.RefreshTokens.GetByTokenAsync("hashedRefreshToken"), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task RefreshTokenAsync__ShouldThrow_UnauthorizedAccessException_WhenRefreshTokenIsExpired()
+    {
+        // Arrange
+        string refreshToken = "someRefreshToken";
+        _tokenServiceMock.Setup(t => t.ComputeHash(It.IsAny<string>())).Returns("hashedRefreshToken");
+        DateTimeOffset currentTime = DateTimeOffset.UtcNow;
+        RefreshTokenDetailRequest request = new(refreshToken, "127.0.0.1", "UnitTestAgent", "UnitTestDevice");
+        RefreshToken storedToken = new()
+        {
+            ExpiresAtUtc = currentTime.AddSeconds(-1).UtcDateTime,
+        };
+        _unitOfWorkMock.Setup(u => u.RefreshTokens.GetByTokenAsync(It.IsAny<string>())).ReturnsAsync(storedToken);
+        _fakeTimeProvider.SetUtcNow(currentTime);
+
+        // Act
+        Task act() => _authenticationService.RefreshTokenAsync(request);
+
+        // Assert
+        await Assert.ThrowsExceptionAsync<UnauthorizedAccessException>(act);
+        _tokenServiceMock.Verify(t => t.ComputeHash(refreshToken), Times.Once);
+        _unitOfWorkMock.Verify(u => u.RefreshTokens.GetByTokenAsync("hashedRefreshToken"), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task RefreshTokenAsync__ShouldThrow_EntityNotFoundException_WhenUserIsNotFound()
+    {
+        // Arrange
+        string refreshToken = "someRefreshToken";
+        _tokenServiceMock.Setup(t => t.ComputeHash(It.IsAny<string>())).Returns("hashedRefreshToken");
+        DateTimeOffset currentTime = DateTimeOffset.UtcNow;
+        RefreshTokenDetailRequest request = new(refreshToken, "127.0.0.1", "UnitTestAgent", "UnitTestDevice");
+        RefreshToken storedToken = new()
+        {
+            UserId = 1,
+            ExpiresAtUtc = currentTime.AddSeconds(1).UtcDateTime,
+        };
+        _unitOfWorkMock.Setup(u => u.RefreshTokens.GetByTokenAsync(It.IsAny<string>())).ReturnsAsync(storedToken);
+        _unitOfWorkMock.Setup(u => u.Users.GetByIdAsync(It.IsAny<int>())).ReturnsAsync((User?)null);
+        _fakeTimeProvider.SetUtcNow(currentTime);
+
+        // Act
+        Task act() => _authenticationService.RefreshTokenAsync(request);
+
+        // Assert
+        await Assert.ThrowsExceptionAsync<EntityNotFoundException>(act);
+        _tokenServiceMock.Verify(t => t.ComputeHash(refreshToken), Times.Once);
+        _unitOfWorkMock.Verify(u => u.RefreshTokens.GetByTokenAsync("hashedRefreshToken"), Times.Once);
+        _unitOfWorkMock.Verify(u => u.Users.GetByIdAsync(storedToken.UserId), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task RefreshTokenAsync__ShouldCall_GenerateTokenAndRefreshTokenAsync_WhenRefreshTokenIsValid()
+    {
+        // Arrange
+        string refreshToken = "someRefreshToken";
+        _tokenServiceMock.Setup(t => t.ComputeHash(It.IsAny<string>())).Returns("hashedRefreshToken");
+        DateTimeOffset currentTime = DateTimeOffset.UtcNow;
+        RefreshTokenDetailRequest request = new(refreshToken, "127.0.0.1", "UnitTestAgent", "UnitTestDevice");
+        RefreshToken storedToken = new()
+        {
+            UserId = 1,
+            ExpiresAtUtc = currentTime.AddSeconds(1).UtcDateTime,
+        };
+        User user = new()
+        {
+            Id = 1,
+            Email = "user@example.com",
+            PasswordHash = "hashedPassword"
+        };
+        var tokenResponse = ("jwtToken", currentTime.AddDays(1).UtcDateTime);
+        var refreshTokenResponse = new RefreshTokenGeneratedDTO
+        {
+            RawToken = "rawRefreshToken",
+            HashedToken = "hashedRefreshToken",
+            ExpiresAtUtc = currentTime.AddDays(7).UtcDateTime
+        };
+        _unitOfWorkMock.SetupAllProperties();
+        _unitOfWorkMock.Setup(u => u.RefreshTokens.GetByTokenAsync(It.IsAny<string>())).ReturnsAsync(storedToken);
+        _unitOfWorkMock.Setup(u => u.Users.GetByIdAsync(It.IsAny<int>())).ReturnsAsync(user);
+        _tokenServiceMock.Setup(t => t.GenerateToken(It.IsAny<User>())).Returns(tokenResponse);
+        _tokenServiceMock.Setup(t => t.GenerateRefreshToken()).Returns(refreshTokenResponse);
+
+        // Act
+        await _authenticationService.RefreshTokenAsync(request);
+
+        // Assert
+        _tokenServiceMock.Verify(t => t.GenerateToken(user), Times.Once);
+        _tokenServiceMock.Verify(t => t.GenerateRefreshToken(), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task RefreshTokenAsync__Should_StoreNewRefreshTokenAndRevokeOldToken_WhenRefreshTokenIsValid()
+    {
+        // Arrange
+        string refreshToken = "someRefreshToken";
+        DateTimeOffset currentTime = DateTimeOffset.UtcNow;
+        RefreshTokenDetailRequest request = new(refreshToken, "127.0.0.1", "UnitTestAgent", "UnitTestDevice");
+        RefreshToken storedToken = new()
+        {
+            UserId = 1,
+            ExpiresAtUtc = currentTime.AddSeconds(1).UtcDateTime,
+        };
+        User user = new()
+        {
+            Id = 1,
+            Email = "user@example.com",
+            PasswordHash = "hashedPassword"
+        };
+        var tokenResponse = ("jwtToken", currentTime.AddDays(1).UtcDateTime);
+        var refreshTokenResponse = new RefreshTokenGeneratedDTO
+        {
+            RawToken = "rawRefreshToken",
+            HashedToken = "hashedRefreshToken",
+            ExpiresAtUtc = currentTime.AddDays(7).UtcDateTime
+        };
+        var newRefreshToken = new RefreshToken
+        {
+            TokenHash = refreshTokenResponse.HashedToken,
+            UserId = user.Id,
+            CreatedByIp = request.IpAddress,
+            UserAgent = request.UserAgent,
+            DeviceName = request.DeviceName,
+            ExpiresAtUtc = refreshTokenResponse.ExpiresAtUtc,
+            CreatedAtUtc = currentTime.UtcDateTime
+        };
+
+        _tokenServiceMock.Setup(t => t.ComputeHash(It.IsAny<string>())).Returns("hashedRefreshToken");
+        _unitOfWorkMock.Setup(u => u.RefreshTokens.GetByTokenAsync(It.IsAny<string>())).ReturnsAsync(storedToken);
+        _unitOfWorkMock.Setup(u => u.Users.GetByIdAsync(It.IsAny<int>())).ReturnsAsync(user);
+        _tokenServiceMock.Setup(t => t.GenerateToken(It.IsAny<User>())).Returns(tokenResponse);
+        _tokenServiceMock.Setup(t => t.GenerateRefreshToken()).Returns(refreshTokenResponse);
+        _unitOfWorkMock.Setup(u => u.RefreshTokens.UpdateAsync(It.IsAny<RefreshToken>()));
+        _unitOfWorkMock.Setup(u => u.RefreshTokens.AddAsync(It.IsAny<RefreshToken>())).Returns(Task.CompletedTask);
+        _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
+        _fakeTimeProvider.SetUtcNow(currentTime);
+
+        // Act
+        await _authenticationService.RefreshTokenAsync(request);
+
+        // Assert
+        _unitOfWorkMock.Verify(u => u.RefreshTokens.UpdateAsync(
+            It.Is<RefreshToken>(rt =>
+                rt.Id == storedToken.Id &&
+                rt.UserId == storedToken.UserId &&
+                rt.ExpiresAtUtc == storedToken.ExpiresAtUtc &&
+                rt.RevokedAtUtc.HasValue &&
+                rt.RevokedAtUtc == currentTime.UtcDateTime
+            )
+        ), Times.Once);
+        _unitOfWorkMock.Verify(u => u.RefreshTokens.AddAsync(
+            It.Is<RefreshToken>(rt =>
+                rt.TokenHash == newRefreshToken.TokenHash &&
+                rt.UserId == newRefreshToken.UserId &&
+                rt.CreatedByIp == newRefreshToken.CreatedByIp &&
+                rt.UserAgent == newRefreshToken.UserAgent &&
+                rt.DeviceName == newRefreshToken.DeviceName &&
+                rt.ExpiresAtUtc == newRefreshToken.ExpiresAtUtc &&
+                rt.CreatedAtUtc == newRefreshToken.CreatedAtUtc
+            )
+        ), Times.Once);
+        _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task RefreshTokenAsync__Should_ReturnNewTokens_WhenRefreshTokenIsValid()
+    {
+        // Arrange
+        string refreshToken = "someRefreshToken";
+        DateTimeOffset currentTime = DateTimeOffset.UtcNow;
+        RefreshTokenDetailRequest request = new(refreshToken, "127.0.0.1", "UnitTestAgent", "UnitTestDevice");
+        RefreshToken storedToken = new()
+        {
+            UserId = 1,
+            ExpiresAtUtc = currentTime.AddSeconds(1).UtcDateTime,
+        };
+        User user = new()
+        {
+            Id = 1,
+            Email = "user@example.com",
+            PasswordHash = "hashedPassword",
+        };
+        var tokenResponse = ("jwtToken", currentTime.AddDays(1).UtcDateTime);
+        var refreshTokenResponse = new RefreshTokenGeneratedDTO
+        {
+            RawToken = "rawRefreshToken",
+            HashedToken = "hashedRefreshToken",
+            ExpiresAtUtc = currentTime.AddDays(7).UtcDateTime
+        };
+        var newRefreshToken = new RefreshToken
+        {
+            TokenHash = refreshTokenResponse.HashedToken,
+            UserId = user.Id,
+            CreatedByIp = request.IpAddress,
+            UserAgent = request.UserAgent,
+            DeviceName = request.DeviceName,
+            ExpiresAtUtc = refreshTokenResponse.ExpiresAtUtc,
+            CreatedAtUtc = currentTime.UtcDateTime
+        };
+
+        _tokenServiceMock.Setup(t => t.ComputeHash(It.IsAny<string>())).Returns("hashedRefreshToken");
+        _unitOfWorkMock.Setup(u => u.RefreshTokens.GetByTokenAsync(It.IsAny<string>())).ReturnsAsync(storedToken);
+        _unitOfWorkMock.Setup(u => u.Users.GetByIdAsync(It.IsAny<int>())).ReturnsAsync(user);
+
+        _tokenServiceMock.Setup(t => t.GenerateToken(It.IsAny<User>())).Returns(tokenResponse);
+        _tokenServiceMock.Setup(t => t.GenerateRefreshToken()).Returns(refreshTokenResponse);
+
+        _unitOfWorkMock.Setup(u => u.RefreshTokens.UpdateAsync(It.IsAny<RefreshToken>()));
+        _unitOfWorkMock.Setup(u => u.RefreshTokens.AddAsync(It.IsAny<RefreshToken>())).Returns(Task.CompletedTask);
+        _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
+
+        _fakeTimeProvider.SetUtcNow(currentTime);
+
+        // Act
+        var response = await _authenticationService.RefreshTokenAsync(request);
+
+        // Assert
+        Assert.IsNotNull(response);
+        Assert.AreEqual(tokenResponse.Item1, response.Token);
+        Assert.AreEqual(tokenResponse.Item2, response.TokenExpiresIn);
+        Assert.AreEqual(refreshTokenResponse.RawToken, response.RefreshToken);
+        Assert.AreEqual(refreshTokenResponse.ExpiresAtUtc, response.RefreshTokenExpiresIn);
+    }
+
+    #endregion RefreshTokenAsync Tests
+
+    
 }
