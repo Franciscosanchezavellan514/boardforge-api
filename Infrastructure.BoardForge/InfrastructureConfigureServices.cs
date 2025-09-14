@@ -7,6 +7,7 @@ using DevStack.Application.BoardForge.Interfaces;
 using DevStack.Infrastructure.BoardForge.Services;
 using DevStack.Infrastructure.BoardForge.Interfaces;
 using DevStack.Domain.BoardForge.Interfaces.Repositories;
+using DevStack.Domain.BoardForge.Interfaces.Services;
 using DevStack.Infrastructure.BoardForge.Data.Repositories;
 
 namespace DevStack.Infrastructure.BoardForge;
@@ -29,6 +30,7 @@ public static partial class InfrastructureConfigureServices
         services.AddScoped<IPasswordHasher, PasswordHasherService>();
         services.AddScoped<ITeamAuthorizationService, TeamAuthorizationService>();
         services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
+        services.AddScoped<IStringUtilsService, StringUtilsService>();
 
         // Unit of Work & Repositories
         services.AddScoped<IUnitOfWork, UnitOfWork>();
