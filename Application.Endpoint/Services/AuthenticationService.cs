@@ -61,7 +61,7 @@ public class AuthenticationService(
             throw new UnauthorizedAccessException("Invalid refresh token.");
         }
 
-        if (existingToken.IsRevoked || existingToken.ExpiresAtUtc <= DateTime.UtcNow)
+        if (existingToken.IsRevoked || existingToken.ExpiresAtUtc <= timeProvider.GetUtcNow().UtcDateTime)
         {
             throw new UnauthorizedAccessException("Refresh token is expired or revoked.");
         }
