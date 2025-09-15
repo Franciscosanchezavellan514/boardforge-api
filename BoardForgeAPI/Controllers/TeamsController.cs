@@ -88,6 +88,10 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(HttpErrorResponse))]
     public async Task<IActionResult> GetMembersAsync(int teamId)
     {
+        var readOnlyRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Viewer);
+        var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(teamId), readOnlyRequirement);
+        if (!auth.Succeeded) throw new ForbiddenException();
+
         var members = await _teamsService.ListMembersAsync(teamId);
         return Ok(members);
     }
@@ -150,8 +154,8 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(HttpErrorResponse))]
     public async Task<IActionResult> GetTeamLabels(int teamId)
     {
-        var ownerRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Owner);
-        var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(teamId), ownerRequirement);
+        var readOnlyRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Viewer);
+        var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(teamId), readOnlyRequirement);
         if (!auth.Succeeded) throw new ForbiddenException();
 
         IEnumerable<TeamLabelResponse> labels = await _teamsService.GetLabelsAsync(teamId);
