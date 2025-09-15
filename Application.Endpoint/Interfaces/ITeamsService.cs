@@ -15,4 +15,5 @@ public interface ITeamsService
     Task<TeamResponse> SoftDeleteAsync(BaseRequest request);
     Task<TeamLabelOperationResponse> AddLabels(BaseRequest<IEnumerable<AddTeamLabelRequest>> request);
     Task<IEnumerable<TeamLabelResponse>> GetLabelsAsync(int teamId);
+    Task<TeamLabelResponse> UpdateLabelAsync(BaseRequest<KeyValuePair<int, UpdateTeamLabelRequest>> request);
 }

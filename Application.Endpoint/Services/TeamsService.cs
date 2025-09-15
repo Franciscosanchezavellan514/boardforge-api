@@ -137,7 +137,7 @@ public class TeamsService(IUnitOfWork unitOfWork, TimeProvider timeProvider, ISt
         bool containsDuplicates = labels.GroupBy(l => l.NormalizedName).Any(g => g.Count() > 1);
         if (containsDuplicates) throw new ArgumentException("Duplicate label names found in request");
 
-        var query = new GetLabelsByTeamAndNamesSpecification(request.ObjectId.Value, labels.Select(l => l.NormalizedName));
+        var query = new GetLabelsByTeamAndNormalizedNameSpecification(request.ObjectId.Value, labels.Select(l => l.NormalizedName));
         IReadOnlyList<Label> existingLabels = await _unitOfWork.Labels.ListAsync(query);
         if (existingLabels.Any())
         {
@@ -148,7 +148,7 @@ public class TeamsService(IUnitOfWork unitOfWork, TimeProvider timeProvider, ISt
                 await _unitOfWork.Labels.AddAsync(filteredLabels);
                 await _unitOfWork.Labels.SaveChangesAsync();
             }
-            
+
             return new TeamLabelOperationResponse(
                 filteredLabels.Select(MapEntityToLabelResponse),
                 existingLabels.Select(MapEntityToLabelResponse)
@@ -170,6 +170,38 @@ public class TeamsService(IUnitOfWork unitOfWork, TimeProvider timeProvider, ISt
         IReadOnlyList<Label> labels = await _unitOfWork.Labels.ListAsync(new GetLabelsByTeamSpecification(teamId));
 
         return labels.Select(MapEntityToLabelResponse);
+    }
+
+    public async Task<TeamLabelResponse> UpdateLabelAsync(BaseRequest<KeyValuePair<int, UpdateTeamLabelRequest>> request)
+    {
+        if (request.ObjectId == null) throw new ArgumentException("ObjectId must be provided");
+        if (!await _unitOfWork.Teams.ExistsAsync(request.ObjectId.Value))
+            throw new KeyNotFoundException($"Team with ID {request.ObjectId.Value} not found");
+
+        var labelByIdAndTeamSpec = new GetLabelByIdAndTeamSpecification(request.Data.Key, request.ObjectId.Value);
+        var existingLabel = await _unitOfWork.Labels.GetFirstAsync(labelByIdAndTeamSpec);
+        if (existingLabel is null) throw new KeyNotFoundException($"Label with ID: {request.Data.Key} not found");
+
+        existingLabel.Name = request.Data.Value.Name;
+        existingLabel.NormalizedName = _stringUtils.NormalizeAndReplaceWhitespaces(existingLabel.Name, '_');
+        existingLabel.ColorHex = string.IsNullOrWhiteSpace(request.Data.Value.Color)
+            ? existingLabel.ColorHex
+            : request.Data.Value.Color;
+        existingLabel.UpdatedAt = _timeProvider.GetUtcNow().UtcDateTime;
+        existingLabel.UpdatedBy = request.UserId;
+
+        var duplicateCheckSpec = new GetLabelsByTeamAndNormalizedNameSpecification(
+            existingLabel.TeamId,
+            existingLabel.NormalizedName, 
+            existingLabel.Id
+            );
+        var isDuplicated = await _unitOfWork.Labels.ExistsAsync(duplicateCheckSpec);
+        if (isDuplicated) throw new ArgumentException($"Label with name {existingLabel.Name} already exists");
+
+        await _unitOfWork.Labels.UpdateAsync(existingLabel);
+        await _unitOfWork.SaveChangesAsync();
+
+        return MapEntityToLabelResponse(existingLabel);
     }
 
     private Label MapRequestToLabel<T>(T labelRequest, BaseRequest<IEnumerable<T>> request) where T : AddTeamLabelRequest

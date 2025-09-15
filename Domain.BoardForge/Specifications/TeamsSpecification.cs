@@ -79,4 +79,9 @@ public sealed class GetLabelsByTeamAndNormalizedNameSpecification : BaseSpecific
     {
         ApplyCriteria(c => c.TeamId.Equals(teamId) && c.NormalizedName.Equals(normalizedName));
     }
+
+    public GetLabelsByTeamAndNormalizedNameSpecification(int teamId, string normalizedName, int excludeLabelId)
+    {
+        ApplyCriteria(c => c.TeamId.Equals(teamId) && c.NormalizedName.Equals(normalizedName) && c.Id != excludeLabelId);
+    }
 }
