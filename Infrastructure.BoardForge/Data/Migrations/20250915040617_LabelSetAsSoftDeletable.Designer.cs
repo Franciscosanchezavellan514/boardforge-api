@@ -5,6 +5,7 @@ using DevStack.Infrastructure.BoardForge.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -13,9 +14,11 @@ namespace DevStack.Infrastructure.BoardForge.Data.Migrations
 {
     [ExcludeFromCodeCoverage]
     [DbContext(typeof(BoardForgeDbContext))]
-    partial class BoardForgeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250915040617_LabelSetAsSoftDeletable")]
+    partial class LabelSetAsSoftDeletable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
