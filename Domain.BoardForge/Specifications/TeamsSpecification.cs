@@ -60,10 +60,23 @@ public sealed class GetLabelsByTeamSpecification : BaseSpecification<Label>
     }
 }
 
-public sealed class GetLabelsByTeamAndNamesSpecification : BaseSpecification<Label>
+public sealed class GetLabelByIdAndTeamSpecification : BaseSpecification<Label>
 {
-    public GetLabelsByTeamAndNamesSpecification(int teamId, IEnumerable<string> normalizedNames)
+    public GetLabelByIdAndTeamSpecification(int id, int teamId)
+    {
+        ApplyCriteria(c => c.Id.Equals(id) && c.TeamId.Equals(teamId));
+    }
+}
+
+public sealed class GetLabelsByTeamAndNormalizedNameSpecification : BaseSpecification<Label>
+{
+    public GetLabelsByTeamAndNormalizedNameSpecification(int teamId, IEnumerable<string> normalizedNames)
     {
         ApplyCriteria(c => c.TeamId.Equals(teamId) && normalizedNames.Contains(c.NormalizedName));
+    }
+
+    public GetLabelsByTeamAndNormalizedNameSpecification(int teamId, string normalizedName)
+    {
+        ApplyCriteria(c => c.TeamId.Equals(teamId) && c.NormalizedName.Equals(normalizedName));
     }
 }
