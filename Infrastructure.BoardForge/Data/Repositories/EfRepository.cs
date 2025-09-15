@@ -95,4 +95,9 @@ public class EfRepository<TEntity> : IAsyncRepository<TEntity> where TEntity : B
     {
         return await ApplySpecification(spec).AnyAsync();
     }
+
+    public Task<TEntity?> GetFirstAsync(ISpecification<TEntity> spec)
+    {
+        return ApplySpecification(spec).FirstOrDefaultAsync();
+    }
 }

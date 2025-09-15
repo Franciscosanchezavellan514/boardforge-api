@@ -21,4 +21,5 @@ public interface IAsyncRepository<TEntity> where TEntity : BaseEntity
     Task<int> CountAsync(ISpecification<TEntity> spec);
     Task<bool> ExistsAsync(ISpecification<TEntity> spec);
     IQueryable<TEntity> ApplySpecification(ISpecification<TEntity> spec);
+    Task<TEntity?> GetFirstAsync(ISpecification<TEntity> spec);
 }
