@@ -55,7 +55,7 @@ public sealed class GetLabelsByTeamSpecification : BaseSpecification<Label>
 {
     public GetLabelsByTeamSpecification(int teamId)
     {
-        ApplyCriteria(c => c.TeamId.Equals(teamId));
+        ApplyCriteria(c => c.TeamId.Equals(teamId) && c.IsActive);
         ApplyOrderBy(order => order.Name);
     }
 }
