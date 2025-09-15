@@ -25,4 +25,5 @@ public interface ITeamsService
     /// <param name="request">The request containing the team member's ID and the new role.</param>
     /// <returns></returns>
     Task<TeamMembershipResponse> UpdateMembershipAsync(BaseRequest<KeyValuePair<int, UpdateTeamMembershipRequest>> request);
+    Task DeleteLabelAsync(BaseRequest<RemoveTeamLabelRequest> request);
 }

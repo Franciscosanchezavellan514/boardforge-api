@@ -9,3 +9,4 @@ public record UpdateTeamMembershipRequest([Required] string Role);
 public record RemoveTeamMemberRequest([Required] int UserId);
 public record AddTeamLabelRequest([Required] string Name, string? Color);
 public record UpdateTeamLabelRequest([Required] string Name, string? Color);
+public record RemoveTeamLabelRequest([Required] int LabelId);

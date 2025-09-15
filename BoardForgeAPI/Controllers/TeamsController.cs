@@ -194,4 +194,18 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
         return Ok(response);
     }
 
+    [HttpDelete("{teamId:int}/labels/{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(HttpErrorResponse))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(HttpErrorResponse))]
+    public async Task<IActionResult> DeleteLabel(int teamId, int id)
+    {
+        var ownerRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Owner);
+        var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(teamId), ownerRequirement);
+        if (!auth.Succeeded) throw new ForbiddenException();
+
+        var baseRequest = new BaseRequest<RemoveTeamLabelRequest>(teamId, CurrentUserId, new RemoveTeamLabelRequest(id));
+        await _teamsService.DeleteLabelAsync(baseRequest);
+        return NoContent();
+    }
 }

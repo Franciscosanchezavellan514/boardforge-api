@@ -233,6 +233,31 @@ public class TeamsService(IUnitOfWork unitOfWork, TimeProvider timeProvider, ISt
             label.UpdatedAt
             );
     }
+    
+    public async Task DeleteLabelAsync(BaseRequest<RemoveTeamLabelRequest> request)
+    {
+        if (request.ObjectId <= 0) throw new ArgumentException("Invalid ObjectId");
+        if (!await _unitOfWork.Teams.ExistsAsync(request.ObjectId))
+            throw new KeyNotFoundException($"Team with ID {request.ObjectId} not found");
+
+        var labelByIdAndTeamSpec = new GetLabelByIdAndTeamSpecification(request.Data.LabelId, request.ObjectId);
+        Label? existingLabel = await _unitOfWork.Labels.GetFirstAsync(labelByIdAndTeamSpec);
+        if (existingLabel is null) throw new KeyNotFoundException($"Label with ID: {request.Data.LabelId} not found");
+
+        // Soft delete if label is associated with any cards
+        if (existingLabel.CardLabels.Any())
+        {
+            existingLabel.IsActive = false;
+            existingLabel.UpdatedBy = request.UserId;
+            existingLabel.UpdatedAt = _timeProvider.GetUtcNow().UtcDateTime;
+            await _unitOfWork.Labels.UpdateAsync(existingLabel);
+            await _unitOfWork.SaveChangesAsync();
+            return;
+        }
+
+        await _unitOfWork.Labels.DeleteAsync(existingLabel);
+        await _unitOfWork.SaveChangesAsync();
+    }
 
     public async Task<TeamMembershipResponse> UpdateMembershipAsync(BaseRequest<KeyValuePair<int, UpdateTeamMembershipRequest>> request)
     {
@@ -251,7 +276,7 @@ public class TeamsService(IUnitOfWork unitOfWork, TimeProvider timeProvider, ISt
         membership.UpdatedBy = request.UserId;
         await _unitOfWork.TeamMemberships.UpdateAsync(membership);
         await _unitOfWork.SaveChangesAsync();
-        
+
         return new TeamMembershipResponse(
             membership.UserId,
             membership.TeamId,
