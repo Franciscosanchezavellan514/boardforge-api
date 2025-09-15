@@ -128,6 +128,7 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
     [HttpGet("{teamId:int}/labels")]
     [ProducesResponseType<IEnumerable<TeamLabelResponse>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(HttpErrorResponse))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(HttpErrorResponse))]
     public async Task<IActionResult> GetTeamLabels(int teamId)
     {
         var ownerRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Owner);
@@ -152,4 +153,26 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
         TeamLabelOperationResponse labels = await _teamsService.AddLabels(baseRequest);
         return Ok(labels);
     }
+
+    [HttpPut("{teamId:int}/labels/{id:int}")]
+    [ProducesResponseType<TeamLabelResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(HttpErrorResponse))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(HttpErrorResponse))]
+    [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(HttpErrorResponse))]
+    public async Task<IActionResult> UpdateLabel(int teamId, int id, [FromBody] UpdateTeamLabelRequest request)
+    {
+        var ownerRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Owner);
+        var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(teamId), ownerRequirement);
+        if (!auth.Succeeded) throw new ForbiddenException();
+
+        var baseRequest = new BaseRequest<KeyValuePair<int, UpdateTeamLabelRequest>>(
+            teamId,
+            CurrentUserId,
+            KeyValuePair.Create(id, request)
+            );
+
+        TeamLabelResponse response = await _teamsService.UpdateLabelAsync(baseRequest);
+        return Ok(response);
+    }
+
 }
