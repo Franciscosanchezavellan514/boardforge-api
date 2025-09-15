@@ -34,6 +34,7 @@ public class HttpErrorResponse
             EntityNotFoundException e => new HttpErrorResponse(StatusCodes.Status404NotFound, e.Message),
             KeyNotFoundException e => new HttpErrorResponse(StatusCodes.Status404NotFound, e.Message),
             ForbiddenException e => new HttpErrorResponse(StatusCodes.Status403Forbidden, e.Message),
+            BadHttpRequestException e => new HttpErrorResponse(StatusCodes.Status400BadRequest, e.Message),
             // Add more exceptions here...
             _ => new HttpErrorResponse(StatusCodes.Status500InternalServerError, "Internal server error. Please retry later."),
         };

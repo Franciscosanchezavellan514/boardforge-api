@@ -114,6 +114,7 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeamMembershipResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(HttpErrorResponse))]
     [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(HttpErrorResponse))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(HttpErrorResponse))]
     public async Task<IActionResult> RemoveMembersAsync(int teamId, int userId)
     {
         var ownerRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Owner);
@@ -122,6 +123,24 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
 
         var baseRequest = new BaseRequest<RemoveTeamMemberRequest>(teamId, CurrentUserId, new RemoveTeamMemberRequest(userId));
         TeamMembershipResponse response = await _teamsService.RemoveMemberAsync(baseRequest);
+        return Ok(response);
+    }
+
+    [HttpPut("{teamId:int}/members/{userId:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeamMembershipResponse))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(HttpErrorResponse))]
+    [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(HttpErrorResponse))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(HttpErrorResponse))]
+    public async Task<IActionResult> UpdateMembership(int teamId, int userId, [FromBody] UpdateTeamMembershipRequest request)
+    {
+        if (userId == CurrentUserId) throw new BadHttpRequestException("You cannot change your own role");
+
+        var ownerRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Owner);
+        var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(teamId), ownerRequirement);
+        if (!auth.Succeeded) throw new ForbiddenException();
+
+        var baseRequest = new BaseRequest<KeyValuePair<int, UpdateTeamMembershipRequest>>(teamId, CurrentUserId, KeyValuePair.Create(userId, request));
+        TeamMembershipResponse response = await _teamsService.UpdateMembershipAsync(baseRequest);
         return Ok(response);
     }
 
