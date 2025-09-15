@@ -2,7 +2,7 @@
 
 namespace DevStack.Domain.BoardForge.Entities;
 
-public class Label : AuditableEntity, ITeamResource
+public class Label : SoftDeletableEntity, ITeamResource
 {
     [Required, MaxLength(100)]
     public string Name { get; set; } = string.Empty;

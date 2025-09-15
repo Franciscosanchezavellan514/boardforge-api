@@ -248,8 +248,9 @@ public class TeamsService(IUnitOfWork unitOfWork, TimeProvider timeProvider, ISt
         if (existingLabel.CardLabels.Any())
         {
             existingLabel.IsActive = false;
-            existingLabel.UpdatedBy = request.UserId;
-            existingLabel.UpdatedAt = _timeProvider.GetUtcNow().UtcDateTime;
+            existingLabel.DeletedAt = _timeProvider.GetUtcNow().UtcDateTime;
+            existingLabel.DeletedBy = request.UserId;
+            
             await _unitOfWork.Labels.UpdateAsync(existingLabel);
             await _unitOfWork.SaveChangesAsync();
             return;
