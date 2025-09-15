@@ -7,7 +7,7 @@ public interface ITeamsService
 {
     Task<TeamResponse> GetByIdAsync(int id);
     Task<IEnumerable<TeamResponse>> ListMyTeamsAsync(int userId);
-    Task<TeamResponse> CreateAsync(BaseRequest<CreateTeamRequest> request);
+    Task<TeamResponse> CreateAsync(CreateRequest<CreateTeamRequest> request);
     Task<TeamResponse> UpdateAsync(BaseRequest<UpdateTeamRequest> request);
     Task<TeamMembershipResponse> AddMemberAsync(BaseRequest<AddTeamMemberRequest> request);
     Task<TeamMembershipResponse> RemoveMemberAsync(BaseRequest<RemoveTeamMemberRequest> request);

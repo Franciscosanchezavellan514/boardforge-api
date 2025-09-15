@@ -17,12 +17,12 @@ public class TeamsService(IUnitOfWork unitOfWork, TimeProvider timeProvider, ISt
 
     public async Task<TeamMembershipResponse> AddMemberAsync(BaseRequest<AddTeamMemberRequest> request)
     {
-        if (request.ObjectId == null) throw new ArgumentException("ObjectId must be provided");
+        if (request.ObjectId <= 0) throw new ArgumentException("Invalid object Id");
         if (!TeamMembershipRole.AllRoles.Contains(request.Data.Role)) throw new ArgumentException("Invalid role");
 
         TeamMembership membership = new()
         {
-            TeamId = request.ObjectId.Value,
+            TeamId = request.ObjectId,
             UserId = request.Data.UserId,
             Role = request.Data.Role,
             CreatedAt = DateTime.UtcNow,
@@ -42,7 +42,7 @@ public class TeamsService(IUnitOfWork unitOfWork, TimeProvider timeProvider, ISt
         );
     }
 
-    public async Task<TeamResponse> CreateAsync(BaseRequest<CreateTeamRequest> request)
+    public async Task<TeamResponse> CreateAsync(CreateRequest<CreateTeamRequest> request)
     {
         Team newTeam = new()
         {
@@ -99,9 +99,9 @@ public class TeamsService(IUnitOfWork unitOfWork, TimeProvider timeProvider, ISt
 
     public async Task<TeamResponse> UpdateAsync(BaseRequest<UpdateTeamRequest> request)
     {
-        if (request.ObjectId == null) throw new ArgumentException("ObjectId must be provided");
+        if (request.ObjectId <= 0) throw new ArgumentException("Invalid ObjectId");
 
-        Team? dbTeam = await _unitOfWork.Teams.GetByIdAsync(request.ObjectId.Value);
+        Team? dbTeam = await _unitOfWork.Teams.GetByIdAsync(request.ObjectId);
         if (dbTeam == null) throw new EntityNotFoundException($"Team with ID {request.ObjectId} not found");
 
         dbTeam.Name = request.Data.Name;
@@ -130,14 +130,14 @@ public class TeamsService(IUnitOfWork unitOfWork, TimeProvider timeProvider, ISt
 
     public async Task<TeamLabelOperationResponse> AddLabels(BaseRequest<IEnumerable<AddTeamLabelRequest>> request)
     {
-        if (request.ObjectId is null) throw new ArgumentNullException("ObjectId is required");
+        if (request.ObjectId <= 0) throw new ArgumentNullException("Invalid ObjectId");
         if (!request.Data.Any()) throw new ArgumentException("At least one value must be provided");
 
         List<Label> labels = request.Data.Select(l => MapRequestToLabel(l, request)).ToList();
         bool containsDuplicates = labels.GroupBy(l => l.NormalizedName).Any(g => g.Count() > 1);
         if (containsDuplicates) throw new ArgumentException("Duplicate label names found in request");
 
-        var query = new GetLabelsByTeamAndNormalizedNameSpecification(request.ObjectId.Value, labels.Select(l => l.NormalizedName));
+        var query = new GetLabelsByTeamAndNormalizedNameSpecification(request.ObjectId, labels.Select(l => l.NormalizedName));
         IReadOnlyList<Label> existingLabels = await _unitOfWork.Labels.ListAsync(query);
         if (existingLabels.Any())
         {
@@ -174,11 +174,11 @@ public class TeamsService(IUnitOfWork unitOfWork, TimeProvider timeProvider, ISt
 
     public async Task<TeamLabelResponse> UpdateLabelAsync(BaseRequest<KeyValuePair<int, UpdateTeamLabelRequest>> request)
     {
-        if (request.ObjectId == null) throw new ArgumentException("ObjectId must be provided");
-        if (!await _unitOfWork.Teams.ExistsAsync(request.ObjectId.Value))
-            throw new KeyNotFoundException($"Team with ID {request.ObjectId.Value} not found");
+        if (request.ObjectId <= 0) throw new ArgumentException("Invalid ObjectId");
+        if (!await _unitOfWork.Teams.ExistsAsync(request.ObjectId))
+            throw new KeyNotFoundException($"Team with ID {request.ObjectId} not found");
 
-        var labelByIdAndTeamSpec = new GetLabelByIdAndTeamSpecification(request.Data.Key, request.ObjectId.Value);
+        var labelByIdAndTeamSpec = new GetLabelByIdAndTeamSpecification(request.Data.Key, request.ObjectId);
         var existingLabel = await _unitOfWork.Labels.GetFirstAsync(labelByIdAndTeamSpec);
         if (existingLabel is null) throw new KeyNotFoundException($"Label with ID: {request.Data.Key} not found");
 
@@ -218,7 +218,7 @@ public class TeamsService(IUnitOfWork unitOfWork, TimeProvider timeProvider, ISt
             CreatedAt = _timeProvider.GetUtcNow().UtcDateTime,
             IsActive = true,
             CreatedBy = request.UserId,
-            TeamId = request.ObjectId!.Value
+            TeamId = request.ObjectId
         };
     }
 
@@ -236,10 +236,10 @@ public class TeamsService(IUnitOfWork unitOfWork, TimeProvider timeProvider, ISt
 
     public async Task<TeamMembershipResponse> RemoveMemberAsync(BaseRequest<RemoveTeamMemberRequest> request)
     {
-        if (request.ObjectId == null) throw new ArgumentException("ObjectId must be provided");
+        if (request.ObjectId <= 0) throw new ArgumentException("Invalid ObjectId");
 
         TeamMembership membership = _unitOfWork.TeamMemberships.ApplySpecification(
-            new GetTeamMembershipByUserAndTeamSpecification(request.Data.UserId, request.ObjectId.Value, false)
+            new GetTeamMembershipByUserAndTeamSpecification(request.Data.UserId, request.ObjectId, false)
         ).FirstOrDefault() ?? throw new KeyNotFoundException("Team membership not found");
 
         await _unitOfWork.TeamMemberships.DeleteAsync(membership);

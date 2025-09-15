@@ -46,7 +46,7 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(HttpErrorResponse))]
     public async Task<IActionResult> Post([FromBody] CreateTeamRequest request)
     {
-        var baseRequest = new BaseRequest<CreateTeamRequest>(null, CurrentUserId, request);
+        var baseRequest = new CreateRequest<CreateTeamRequest>(CurrentUserId, request);
         var team = await _teamsService.CreateAsync(baseRequest);
         return CreatedAtAction(nameof(GetAsync), new { id = team.Id }, team);
     }
