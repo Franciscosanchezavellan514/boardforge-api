@@ -142,11 +142,15 @@ public class TeamsService(IUnitOfWork unitOfWork, TimeProvider timeProvider, ISt
         if (existingLabels.Any())
         {
             List<string> normalizedNames = existingLabels.Select(el => el.NormalizedName).ToList();
-            IEnumerable<Label> filteredLabels = labels.Where(l => !normalizedNames.Contains(l.NormalizedName));
-            var savedLabels = await _unitOfWork.Labels.AddAsync(filteredLabels);
-            await _unitOfWork.Labels.SaveChangesAsync();
+            IEnumerable<Label> filteredLabels = labels.Where(l => !normalizedNames.Contains(l.NormalizedName)).ToList();
+            if (filteredLabels.Any())
+            {
+                await _unitOfWork.Labels.AddAsync(filteredLabels);
+                await _unitOfWork.Labels.SaveChangesAsync();
+            }
+            
             return new TeamLabelOperationResponse(
-                savedLabels.Select(MapEntityToLabelResponse),
+                filteredLabels.Select(MapEntityToLabelResponse),
                 existingLabels.Select(MapEntityToLabelResponse)
                 );
         }
