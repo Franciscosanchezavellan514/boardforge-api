@@ -234,6 +234,33 @@ public class TeamsService(IUnitOfWork unitOfWork, TimeProvider timeProvider, ISt
             );
     }
 
+    public async Task<TeamMembershipResponse> UpdateMembershipAsync(BaseRequest<KeyValuePair<int, UpdateTeamMembershipRequest>> request)
+    {
+        if (request.ObjectId <= 0) throw new ArgumentException("Invalid ObjectId");
+        if (!TeamMembershipRole.AllRoles.Contains(request.Data.Value.Role)) throw new ArgumentException("Invalid role");
+
+        if (!await _unitOfWork.Teams.ExistsAsync(request.ObjectId))
+            throw new KeyNotFoundException($"Team with ID {request.ObjectId} not found");
+
+        var querySpec = new GetTeamMembershipByUserAndTeamSpecification(request.Data.Key, request.ObjectId, false);
+        TeamMembership? membership = await _unitOfWork.TeamMemberships.GetFirstAsync(querySpec);
+        if (membership is null) throw new KeyNotFoundException($"Member with Id: {request.Data.Key} not found");
+
+        membership.Role = request.Data.Value.Role;
+        membership.UpdatedAt = _timeProvider.GetUtcNow().UtcDateTime;
+        membership.UpdatedBy = request.UserId;
+        await _unitOfWork.TeamMemberships.UpdateAsync(membership);
+        await _unitOfWork.SaveChangesAsync();
+        
+        return new TeamMembershipResponse(
+            membership.UserId,
+            membership.TeamId,
+            membership.Role,
+            membership.CreatedAt,
+            membership.CreatedBy
+        );
+    }
+
     public async Task<TeamMembershipResponse> RemoveMemberAsync(BaseRequest<RemoveTeamMemberRequest> request)
     {
         if (request.ObjectId <= 0) throw new ArgumentException("Invalid ObjectId");

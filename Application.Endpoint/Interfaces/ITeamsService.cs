@@ -16,4 +16,13 @@ public interface ITeamsService
     Task<TeamLabelOperationResponse> AddLabels(BaseRequest<IEnumerable<AddTeamLabelRequest>> request);
     Task<IEnumerable<TeamLabelResponse>> GetLabelsAsync(int teamId);
     Task<TeamLabelResponse> UpdateLabelAsync(BaseRequest<KeyValuePair<int, UpdateTeamLabelRequest>> request);
+    /// <summary>
+    /// Update a team member's role within a team.
+    /// The request containing the team member's ID and the new role.<br/>
+    /// Key of the KeyValuePair is the UserId of the member whose role is to be updated.<br/>
+    /// Value of the KeyValuePair is an UpdateTeamMembershipRequest containing the new role.
+    /// </summary>
+    /// <param name="request">The request containing the team member's ID and the new role.</param>
+    /// <returns></returns>
+    Task<TeamMembershipResponse> UpdateMembershipAsync(BaseRequest<KeyValuePair<int, UpdateTeamMembershipRequest>> request);
 }
