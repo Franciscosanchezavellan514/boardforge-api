@@ -15,9 +15,10 @@ namespace DevStack.BoardForgeAPI.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
-public class TeamsController(ITeamsService teamsService, IAuthorizationService authorizationService) : BaseApiController
+public class TeamsController(ITeamsService teamsService, ILabelsService labelsService, IAuthorizationService authorizationService) : BaseApiController
 {
     private readonly ITeamsService _teamsService = teamsService;
+    private readonly ILabelsService _labelsService = labelsService;
     private readonly IAuthorizationService _authorizationService = authorizationService;
 
     /// <summary>
@@ -158,7 +159,7 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
         var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(teamId), readOnlyRequirement);
         if (!auth.Succeeded) throw new ForbiddenException();
 
-        IEnumerable<TeamLabelResponse> labels = await _teamsService.GetLabelsAsync(teamId);
+        IEnumerable<TeamLabelResponse> labels = await _labelsService.GetLabelsAsync(teamId);
         return Ok(labels);
     }
 
@@ -173,7 +174,7 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
         if (!auth.Succeeded) throw new ForbiddenException();
 
         var baseRequest = new BaseRequest<IEnumerable<AddTeamLabelRequest>>(teamId, CurrentUserId, requests);
-        TeamLabelOperationResponse labels = await _teamsService.AddLabels(baseRequest);
+        TeamLabelOperationResponse labels = await _labelsService.AddLabels(baseRequest);
         return Ok(labels);
     }
 
@@ -194,7 +195,7 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
             KeyValuePair.Create(id, request)
             );
 
-        TeamLabelResponse response = await _teamsService.UpdateLabelAsync(baseRequest);
+        TeamLabelResponse response = await _labelsService.UpdateLabelAsync(baseRequest);
         return Ok(response);
     }
 
@@ -209,7 +210,7 @@ public class TeamsController(ITeamsService teamsService, IAuthorizationService a
         if (!auth.Succeeded) throw new ForbiddenException();
 
         var baseRequest = new BaseRequest<RemoveTeamLabelRequest>(teamId, CurrentUserId, new RemoveTeamLabelRequest(id));
-        await _teamsService.DeleteLabelAsync(baseRequest);
+        await _labelsService.DeleteLabelAsync(baseRequest);
         return NoContent();
     }
 }

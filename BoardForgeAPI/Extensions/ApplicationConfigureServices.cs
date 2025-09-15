@@ -10,6 +10,7 @@ public static class ApplicationConfigureServices
         services.AddScoped<ITeamsService, TeamsService>();
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<IUsersService, UsersService>();
+        services.AddScoped<ILabelsService, LabelsService>();
         
         return services;
     }
