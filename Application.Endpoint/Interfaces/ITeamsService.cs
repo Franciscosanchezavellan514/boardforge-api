@@ -13,9 +13,6 @@ public interface ITeamsService
     Task<TeamMembershipResponse> RemoveMemberAsync(BaseRequest<RemoveTeamMemberRequest> request);
     Task<IEnumerable<TeamMembersResponse>> ListMembersAsync(int teamId);
     Task<TeamResponse> SoftDeleteAsync(BaseRequest request);
-    Task<TeamLabelOperationResponse> AddLabels(BaseRequest<IEnumerable<AddTeamLabelRequest>> request);
-    Task<IEnumerable<TeamLabelResponse>> GetLabelsAsync(int teamId);
-    Task<TeamLabelResponse> UpdateLabelAsync(BaseRequest<KeyValuePair<int, UpdateTeamLabelRequest>> request);
     /// <summary>
     /// Update a team member's role within a team.
     /// The request containing the team member's ID and the new role.<br/>
@@ -25,5 +22,4 @@ public interface ITeamsService
     /// <param name="request">The request containing the team member's ID and the new role.</param>
     /// <returns></returns>
     Task<TeamMembershipResponse> UpdateMembershipAsync(BaseRequest<KeyValuePair<int, UpdateTeamMembershipRequest>> request);
-    Task DeleteLabelAsync(BaseRequest<RemoveTeamLabelRequest> request);
 }
