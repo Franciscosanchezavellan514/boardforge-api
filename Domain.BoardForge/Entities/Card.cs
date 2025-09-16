@@ -18,12 +18,10 @@ public class Card : VersionedEntity, ITeamResource
     public int TeamId { get; set; }
     public Team? Team { get; set; }
 
-    [Required]
-    public int BoardId { get; set; }
+    public int? BoardId { get; set; }
     public Board? Board { get; set; }
 
-    [Required]
-    public int OwnerId { get; set; }
+    public int? OwnerId { get; set; }
     public User? Owner { get; set; }
 
     // Navigation properties
