@@ -26,13 +26,6 @@ public class Card : VersionedEntity, ITeamResource
     public int OwnerId { get; set; }
     public User? Owner { get; set; }
 
-    /// <summary>
-    /// Optional HTTP ETag mirror (e.g., hash of RowVersion);
-    /// not required by EF, but useful at the API layer.
-    /// </summary>
-    [MaxLength(128)]
-    public string? ETag { get; set; }
-
     // Navigation properties
     public ICollection<CardLabel> Labels { get; set; } = new HashSet<CardLabel>();
     public ICollection<CardComment> Comments { get; set; } = new HashSet<CardComment>();
