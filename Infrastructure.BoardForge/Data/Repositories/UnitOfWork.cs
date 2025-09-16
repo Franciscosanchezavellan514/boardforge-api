@@ -8,11 +8,10 @@ public class UnitOfWork : IUnitOfWork
     private readonly BoardForgeDbContext _dbContext;
     public IUserRepository Users { get; }
     public IRefreshTokenRepository RefreshTokens { get; }
-
     public IAsyncRepository<Team> Teams { get; }
-
     public IAsyncRepository<TeamMembership> TeamMemberships { get; }
     public IAsyncRepository<Label> Labels { get; }
+    public IAsyncRepository<Card> Cards { get; }
 
     public UnitOfWork(BoardForgeDbContext dbContext)
     {
@@ -22,6 +21,7 @@ public class UnitOfWork : IUnitOfWork
         Teams = new EfRepository<Team>(_dbContext);
         TeamMemberships = new EfRepository<TeamMembership>(_dbContext);
         Labels = new EfRepository<Label>(_dbContext);
+        Cards = new EfRepository<Card>(_dbContext);
     }
 
     public async Task<int> SaveChangesAsync()
