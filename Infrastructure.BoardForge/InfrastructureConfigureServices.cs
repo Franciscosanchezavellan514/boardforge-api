@@ -31,6 +31,7 @@ public static partial class InfrastructureConfigureServices
         services.AddScoped<ITeamAuthorizationService, TeamAuthorizationService>();
         services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
         services.AddScoped<IStringUtilsService, StringUtilsService>();
+        services.AddScoped<IEtagService, EtagService>();
 
         // Unit of Work & Repositories
         services.AddScoped<IUnitOfWork, UnitOfWork>();
