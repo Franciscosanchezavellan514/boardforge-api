@@ -1,4 +1,5 @@
-﻿using DevStack.Application.BoardForge.DTOs.Response;
+﻿using DevStack.Application.BoardForge.DTOs.Request;
+using DevStack.Application.BoardForge.DTOs.Response;
 using DevStack.Application.BoardForge.Interfaces;
 using DevStack.Domain.BoardForge.Entities;
 using DevStack.Domain.BoardForge.Interfaces.Repositories;
@@ -11,6 +12,11 @@ public class CardsService(IUnitOfWork unitOfWork, IEtagService etagService) : IC
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly IEtagService _etagService = etagService;
+
+    public Task<CardResponse> CreateAsync(CreateCardRequest request)
+    {
+        throw new NotImplementedException();
+    }
 
     public async Task<IEnumerable<CardResponse>> ListAsync(int teamId)
     {
