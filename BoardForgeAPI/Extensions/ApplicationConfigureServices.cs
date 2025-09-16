@@ -11,6 +11,7 @@ public static class ApplicationConfigureServices
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<IUsersService, UsersService>();
         services.AddScoped<ILabelsService, LabelsService>();
+        services.AddScoped<ICardsService, CardsService>();
         
         return services;
     }

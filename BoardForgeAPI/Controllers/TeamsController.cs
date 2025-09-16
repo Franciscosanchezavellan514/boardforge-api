@@ -15,11 +15,16 @@ namespace DevStack.BoardForgeAPI.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
-public class TeamsController(ITeamsService teamsService, ILabelsService labelsService, IAuthorizationService authorizationService) : BaseApiController
+public class TeamsController(
+    ITeamsService teamsService, 
+    ILabelsService labelsService, 
+    IAuthorizationService authorizationService,
+    ICardsService cardsService) : BaseApiController
 {
     private readonly ITeamsService _teamsService = teamsService;
     private readonly ILabelsService _labelsService = labelsService;
     private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly ICardsService _cardsService = cardsService;
 
     /// <summary>
     /// Get all teams the current user is a member of
@@ -212,5 +217,19 @@ public class TeamsController(ITeamsService teamsService, ILabelsService labelsSe
         var baseRequest = new BaseRequest<RemoveTeamLabelRequest>(teamId, CurrentUserId, new RemoveTeamLabelRequest(id));
         await _labelsService.DeleteLabelAsync(baseRequest);
         return NoContent();
+    }
+
+    [HttpGet("{teamId:int}/cards")]
+    [ProducesResponseType<IEnumerable<CardResponse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> GetCards(int teamId)
+    {
+        var readOnlyRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Viewer);
+        var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(teamId), readOnlyRequirement);
+        if (!auth.Succeeded) throw new ForbiddenException();
+
+        IEnumerable<CardResponse> cards = await _cardsService.ListAsync(teamId);
+        return Ok(cards);
     }
 }
