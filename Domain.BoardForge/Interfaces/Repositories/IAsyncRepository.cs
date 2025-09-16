@@ -8,6 +8,7 @@ public interface IAsyncRepository<TEntity> where TEntity : BaseEntity
     Task<IReadOnlyList<TEntity>> ListAllAsync();
     Task<TEntity> AddAsync(TEntity entity);
     Task UpdateAsync(TEntity entity);
+    Task UpdateAsync(ConcurrencyToken token, Action<TEntity> applyChanges);
     Task DeleteAsync(TEntity entity);
     Task<bool> ExistsAsync(int id);
     Task<List<TEntity>> AddAsync(IEnumerable<TEntity> entity);

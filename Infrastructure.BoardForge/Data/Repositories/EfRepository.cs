@@ -1,4 +1,5 @@
 using DevStack.Domain.BoardForge.Entities;
+using DevStack.Domain.BoardForge.Exceptions;
 using DevStack.Domain.BoardForge.Interfaces;
 using DevStack.Domain.BoardForge.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -62,12 +63,30 @@ public class EfRepository<TEntity> : IAsyncRepository<TEntity> where TEntity : B
 
     public async Task<int> SaveChangesAsync()
     {
-        return await _dbContext.SaveChangesAsync();
+        try
+        {
+            // Attempt to save changes
+            return await _dbContext.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            // Handle concurrency conflicts
+            throw new EntityConcurrencyConflictException<TEntity>();
+        }
     }
 
-    public Task<int> SaveChangesAsync(CancellationToken cancellationToken)
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
-        return _dbContext.SaveChangesAsync(cancellationToken);
+        try
+        {
+            // Attempt to save changes
+            return await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            // Handle concurrency conflicts
+            throw new EntityConcurrencyConflictException<TEntity>();
+        }
     }
 
     public async Task<IReadOnlyList<TEntity>> ListAsync(ISpecification<TEntity> spec)
@@ -99,5 +118,31 @@ public class EfRepository<TEntity> : IAsyncRepository<TEntity> where TEntity : B
     public Task<TEntity?> GetFirstAsync(ISpecification<TEntity> spec)
     {
         return ApplySpecification(spec).FirstOrDefaultAsync();
+    }
+
+    public Task UpdateAsync(ConcurrencyToken token, Action<TEntity> applyChanges)
+    {
+        var entity = _dbContext.Set<TEntity>().FirstOrDefault(e => e.Id == token.Id);
+        if (entity is null) throw new EntityNotFoundException($"Entity of type {typeof(TEntity).Name} with ID {token.Id} not found.");
+
+        // Apply changes
+        applyChanges(entity);
+        if (entity is not VersionedEntity versionedEntity)
+            throw new InvalidOperationException($"Entity of type {typeof(TEntity).Name} does not support concurrency control.");
+
+        // Set the original RowVersion to handle concurrency
+        SetOriginalRowVersion(versionedEntity, token.RowVersion);
+
+        // Don't call update, EF Core will mark all properties as modified, which we don't want.
+        //_dbContext.Set<TEntity>().Update(entity);
+
+        return Task.CompletedTask;
+    }
+
+    private void SetOriginalRowVersion<TVersionedEntity>(TVersionedEntity entity, byte[] originalRowVersion) where TVersionedEntity : VersionedEntity
+    {
+        var entry = _dbContext.Entry(entity);
+        entry.Property(e => e.RowVersion).OriginalValue = originalRowVersion;
+        // Do NOT set CurrentValue; EF will set the new RowVersion after a successful save.
     }
 }
