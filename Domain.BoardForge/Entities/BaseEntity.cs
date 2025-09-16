@@ -32,3 +32,5 @@ public abstract class VersionedEntity : SoftDeletableEntity
     [Timestamp]
     public byte[] RowVersion { get; set; } = [];
 }
+
+public record ConcurrencyToken(int Id, byte[] RowVersion);
