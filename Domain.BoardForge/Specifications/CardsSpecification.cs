@@ -12,3 +12,12 @@ public class CardsByTeamIdSpecification : BaseSpecification<Card>
         AddInclude(i => i.Labels);
     }
 }
+
+public class CardByIdAndTeamIdSpecification : BaseSpecification<Card>
+{
+    public CardByIdAndTeamIdSpecification(int id, int teamId)
+    {
+        ApplyCriteria(c => c.Id == id && c.TeamId == teamId);
+        AddInclude(i => i.Labels);
+    }
+}
