@@ -8,3 +8,12 @@ public record CreateCardRequest(
     int? BoardId,
     int? OwnerId
 );
+
+public record UpdateCardRequest(
+    string? Title,
+    string? Description,
+    int? Order,
+    int? BoardColumnId,
+    int? BoardId,
+    int? OwnerId
+);
