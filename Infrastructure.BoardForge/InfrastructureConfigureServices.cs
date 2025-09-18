@@ -9,6 +9,7 @@ using DevStack.Infrastructure.BoardForge.Interfaces;
 using DevStack.Domain.BoardForge.Interfaces.Repositories;
 using DevStack.Domain.BoardForge.Interfaces.Services;
 using DevStack.Infrastructure.BoardForge.Data.Repositories;
+using DevStack.Application.BoardForge.Interfaces.Queries;
 
 namespace DevStack.Infrastructure.BoardForge;
 
@@ -32,6 +33,9 @@ public static partial class InfrastructureConfigureServices
         services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
         services.AddScoped<IStringUtilsService, StringUtilsService>();
         services.AddScoped<IEtagService, EtagService>();
+
+        // Queries
+        services.AddScoped<ICardQueries, CardQueries>();
 
         // Unit of Work & Repositories
         services.AddScoped<IUnitOfWork, UnitOfWork>();
