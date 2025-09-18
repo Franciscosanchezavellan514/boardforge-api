@@ -21,3 +21,15 @@ public class CardByIdAndTeamIdSpecification : BaseSpecification<Card>
         AddInclude(i => i.Labels);
     }
 }
+
+public class CardLabelsByCardIdSpecification : BaseSpecification<CardLabel>
+{
+    public CardLabelsByCardIdSpecification(int cardId, bool includeLabel = false)
+    {
+        ApplyCriteria(cl => cl.CardId == cardId);
+        if (includeLabel)
+        {
+            AddInclude(i => i.Label!);
+        }
+    }
+}
