@@ -13,6 +13,8 @@ public class UnitOfWork : IUnitOfWork
     public IAsyncRepository<Label> Labels { get; }
     public IAsyncRepository<Card> Cards { get; }
 
+    public IAsyncRepository<CardLabel> CardLabels { get; }
+
     public UnitOfWork(BoardForgeDbContext dbContext)
     {
         _dbContext = dbContext;
@@ -22,6 +24,7 @@ public class UnitOfWork : IUnitOfWork
         TeamMemberships = new EfRepository<TeamMembership>(_dbContext);
         Labels = new EfRepository<Label>(_dbContext);
         Cards = new EfRepository<Card>(_dbContext);
+        CardLabels = new EfRepository<CardLabel>(_dbContext);
     }
 
     public async Task<int> SaveChangesAsync()

@@ -10,6 +10,7 @@ public interface IUnitOfWork
     IAsyncRepository<Team> Teams { get; }
     IAsyncRepository<TeamMembership> TeamMemberships { get; }
     IAsyncRepository<Label> Labels { get; }
+    IAsyncRepository<CardLabel> CardLabels { get; }
     IAsyncRepository<Card> Cards { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     Task<int> SaveChangesAsync();
