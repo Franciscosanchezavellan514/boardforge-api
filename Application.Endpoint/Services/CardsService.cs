@@ -14,14 +14,6 @@ public class CardsService(IUnitOfWork unitOfWork, IEtagService etagService, Time
     private readonly IEtagService _etagService = etagService;
     private readonly TimeProvider _timeProvider = timeProvider;
 
-    public async Task<IEnumerable<CardResponse>> ListAsync(int teamId)
-    {
-        if (teamId <= 0) throw new ArgumentException("Invalid team ID.", nameof(teamId));
-
-        IReadOnlyList<Card> cards = await _unitOfWork.Cards.ListAsync(new CardsByTeamIdSpecification(teamId));
-        return cards.Select(MapEntityToCardResponse);
-    }
-
     public async Task<CardResponse> CreateAsync(BaseRequest<CreateCardRequest> request)
     {
         bool teamExists = await _unitOfWork.Teams.ExistsAsync(request.ObjectId);
@@ -78,11 +70,68 @@ public class CardsService(IUnitOfWork unitOfWork, IEtagService etagService, Time
             card.TeamId,
             card.BoardId,
             card.OwnerId,
+            card.Owner?.DisplayName ?? string.Empty,
             etag,
             card.CreatedAt,
             card.UpdatedAt,
             card.CreatedBy,
-            card.UpdatedBy
+            card.UpdatedBy,
+            card.Labels?.Select(cl => new LookupItem(cl.Label!.Id, cl.Label.Name)) ?? []
         );
+    }
+
+    public async Task<CardResponse> UpdateAsync(UpdateTeamResourceRequest<UpdateCardRequest> request, string etag)
+    {
+        if (!HasUpdates(request.Data)) throw new ArgumentException("At least one field must be provided for update.", nameof(request));
+
+        bool teamExists = await _unitOfWork.Teams.ExistsAsync(request.TeamId);
+        if (!teamExists) throw new KeyNotFoundException($"Team with ID {request.TeamId} not found.");
+
+        bool cardExists = await _unitOfWork.Cards.ExistsAsync(new CardByIdAndTeamIdSpecification(request.ResourceId, request.TeamId));
+        if (!cardExists) throw new KeyNotFoundException($"Card with ID {request.ResourceId} not found in team {request.TeamId}.");
+
+        if (!_etagService.TryParseIfMatch(etag, out var rowVersion, out _)) throw new ArgumentException("Invalid etag format.", nameof(etag));
+
+        var token = new ConcurrencyToken(request.ResourceId, rowVersion);
+        await _unitOfWork.Cards.UpdateAsync(token, card => ApplyUpdates(card, request));
+        await _unitOfWork.SaveChangesAsync();
+
+        Card updatedCard = await _unitOfWork.Cards.GetByIdAsync(request.ResourceId)
+            ?? throw new KeyNotFoundException($"Card with ID {request.ResourceId} not found after update.");
+        return MapEntityToCardResponse(updatedCard);
+    }
+
+    private static bool HasUpdates(UpdateCardRequest updates) =>
+        !string.IsNullOrWhiteSpace(updates.Title) ||
+        updates.Description != null ||
+        updates.Order.HasValue ||
+        updates.BoardColumnId.HasValue ||
+        updates.BoardId.HasValue ||
+        updates.OwnerId.HasValue;
+    
+    private void ApplyUpdates(Card card, UpdateTeamResourceRequest<UpdateCardRequest> request)
+    {
+        var updates = request.Data;
+
+        if (!string.IsNullOrWhiteSpace(updates.Title))
+            card.Title = updates.Title;
+
+        if (updates.Description != null)
+            card.Description = updates.Description;
+
+        if (updates.Order.HasValue)
+            card.Order = updates.Order.Value;
+
+        if (updates.BoardColumnId.HasValue)
+            card.BoardColumnId = updates.BoardColumnId.Value;
+
+        if (updates.BoardId.HasValue)
+            card.BoardId = updates.BoardId.Value;
+
+        if (updates.OwnerId.HasValue)
+            card.OwnerId = updates.OwnerId.Value;
+
+        card.UpdatedBy = request.UserId;
+        card.UpdatedAt = _timeProvider.GetUtcNow().UtcDateTime;
     }
 }
