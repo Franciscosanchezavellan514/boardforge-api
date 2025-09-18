@@ -9,9 +9,11 @@ public record CardResponse(
     int TeamId,
     int? BoardId,
     int? OwnerId,
+    string OwnerName,
     string? ETag,
     DateTime CreatedAt,
     DateTime? UpdatedAt,
     int CreatedBy,
-    int? UpdatedBy
+    int? UpdatedBy,
+    IEnumerable<LookupItem> Labels
 );
