@@ -1,10 +1,12 @@
 ﻿using DevStack.Application.BoardForge.DTOs.Request;
 using DevStack.Application.BoardForge.DTOs.Response;
 using DevStack.Application.BoardForge.Interfaces;
+using DevStack.Application.BoardForge.Interfaces.Queries;
 using DevStack.BoardForgeAPI.Authorization;
 using DevStack.BoardForgeAPI.Exceptions;
 using DevStack.BoardForgeAPI.Models;
 using DevStack.Domain.BoardForge.Entities;
+using DevStack.Domain.BoardForge.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,15 +18,19 @@ namespace DevStack.BoardForgeAPI.Controllers;
 [ApiController]
 [Authorize]
 public class TeamsController(
-    ITeamsService teamsService, 
-    ILabelsService labelsService, 
+    ITeamsService teamsService,
+    ILabelsService labelsService,
     IAuthorizationService authorizationService,
-    ICardsService cardsService) : BaseApiController
+    ICardsService cardsService,
+    ICardQueries cardQueries,
+    IEtagService etagService) : BaseApiController
 {
     private readonly ITeamsService _teamsService = teamsService;
     private readonly ILabelsService _labelsService = labelsService;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly ICardsService _cardsService = cardsService;
+    private readonly IEtagService _etagService = etagService;
+    private readonly ICardQueries _cardQueries = cardQueries;
 
     /// <summary>
     /// Get all teams the current user is a member of
@@ -223,13 +229,63 @@ public class TeamsController(
     [ProducesResponseType<IEnumerable<CardResponse>>(StatusCodes.Status200OK)]
     [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> GetCards(int teamId)
+    public async Task<IActionResult> GetCardsAsync(int teamId)
     {
         var readOnlyRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Viewer);
         var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(teamId), readOnlyRequirement);
         if (!auth.Succeeded) throw new ForbiddenException();
 
-        IEnumerable<CardResponse> cards = await _cardsService.ListAsync(teamId);
+        IEnumerable<CardResponse> cards = await _cardQueries.GetByTeamWithLabelsAsync(teamId);
         return Ok(cards);
+    }
+
+    [HttpGet("{teamId:int}/cards/{id:int}")]
+    [ProducesResponseType<CardResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetCardAsync(int teamId, int id)
+    {
+        var readOnlyRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Viewer);
+        var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(teamId), readOnlyRequirement);
+        if (!auth.Succeeded) throw new ForbiddenException();
+
+        CardResponse card = await _cardsService.GetAsync(teamId, id);
+        return Ok(card);
+    }
+
+    [HttpPost("{teamId:int}/cards")]
+    [ProducesResponseType<CardResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> CreateCardAsync(int teamId, [FromBody] CreateCardRequest request)
+    {
+        var writeRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Member);
+        var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(teamId), writeRequirement);
+        if (!auth.Succeeded) throw new ForbiddenException();
+
+        var baseRequest = new BaseRequest<CreateCardRequest>(teamId, CurrentUserId, request);
+        CardResponse card = await _cardsService.CreateAsync(baseRequest);
+        return CreatedAtAction(nameof(GetCardAsync), new { teamId, id = card.Id }, card);
+    }
+
+    [HttpPatch("{teamId:int}/cards/{cardId:int}")]
+    [ProducesResponseType<CardResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateCardAsync(int teamId, int cardId, [FromBody] UpdateCardRequest request)
+    {
+        var writeRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Member);
+        var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(teamId), writeRequirement);
+        if (!auth.Succeeded) throw new ForbiddenException();
+
+        if (!Request.Headers.TryGetValue("If-Match", out var etag))
+        {
+            throw new BadHttpRequestException("Missing If-Match header");
+        }
+
+        var updateRequest = new UpdateTeamResourceRequest<UpdateCardRequest>(teamId, cardId, CurrentUserId, request);
+        await _cardsService.UpdateAsync(updateRequest, etag.ToString());
+        return NoContent();
     }
 }
