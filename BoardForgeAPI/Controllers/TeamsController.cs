@@ -137,8 +137,8 @@ public class TeamsController(
         var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(teamId), ownerRequirement);
         if (!auth.Succeeded) throw new ForbiddenException();
 
-        var baseRequest = new BaseRequest<RemoveTeamMemberRequest>(teamId, CurrentUserId, new RemoveTeamMemberRequest(userId));
-        TeamMembershipResponse response = await _teamsService.RemoveMemberAsync(baseRequest);
+        var deleteRequest = new DeleteTeamResourceRequest(userId, teamId, CurrentUserId);
+        TeamMembershipResponse response = await _teamsService.RemoveMemberAsync(deleteRequest);
         return Ok(response);
     }
 

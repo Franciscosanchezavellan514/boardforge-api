@@ -10,7 +10,7 @@ public interface ITeamsService
     Task<TeamResponse> CreateAsync(CreateRequest<CreateTeamRequest> request);
     Task<TeamResponse> UpdateAsync(BaseRequest<UpdateTeamRequest> request);
     Task<TeamMembershipResponse> AddMemberAsync(BaseRequest<AddTeamMemberRequest> request);
-    Task<TeamMembershipResponse> RemoveMemberAsync(BaseRequest<RemoveTeamMemberRequest> request);
+    Task<TeamMembershipResponse> RemoveMemberAsync(DeleteTeamResourceRequest request);
     Task<IEnumerable<TeamMembersResponse>> ListMembersAsync(int teamId);
     Task<TeamResponse> SoftDeleteAsync(BaseRequest request);
     /// <summary>

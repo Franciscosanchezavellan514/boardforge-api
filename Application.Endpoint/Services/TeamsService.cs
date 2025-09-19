@@ -153,12 +153,12 @@ public class TeamsService(IUnitOfWork unitOfWork, TimeProvider timeProvider) : I
         );
     }
 
-    public async Task<TeamMembershipResponse> RemoveMemberAsync(BaseRequest<RemoveTeamMemberRequest> request)
+    public async Task<TeamMembershipResponse> RemoveMemberAsync(DeleteTeamResourceRequest request)
     {
-        if (request.ObjectId <= 0) throw new ArgumentException("Invalid ObjectId");
+        if (request.TeamId <= 0) throw new ArgumentException("Invalid TeamId");
 
         TeamMembership membership = _unitOfWork.TeamMemberships.ApplySpecification(
-            new GetTeamMembershipByUserAndTeamSpecification(request.Data.UserId, request.ObjectId, false)
+            new GetTeamMembershipByUserAndTeamSpecification(request.ResourceId, request.TeamId, false)
         ).FirstOrDefault() ?? throw new KeyNotFoundException("Team membership not found");
 
         await _unitOfWork.TeamMemberships.DeleteAsync(membership);
