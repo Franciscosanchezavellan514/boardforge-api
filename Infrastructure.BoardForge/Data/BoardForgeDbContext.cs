@@ -31,37 +31,7 @@ public class BoardForgeDbContext : DbContext
         modelBuilder.ApplyConfiguration(new RefreshTokenEntityConfiguration());
         modelBuilder.ApplyConfiguration(new BoardEntityConfiguration());
         modelBuilder.ApplyConfiguration(new BoardColumnEntityConfiguration());
-
-        modelBuilder.Entity<Card>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.HasOne(e => e.Board)
-                  .WithMany(b => b.Cards)
-                  .HasForeignKey(e => e.BoardId)
-                  .OnDelete(DeleteBehavior.NoAction);
-            entity.HasOne(e => e.BoardColumn)
-                  .WithMany(c => c.Cards)
-                  .HasForeignKey(e => e.BoardColumnId)
-                  .OnDelete(DeleteBehavior.NoAction);
-            entity.HasMany(e => e.Attachments)
-                  .WithOne(a => a.Card)
-                  .HasForeignKey(a => a.CardId);
-            entity.HasMany(e => e.Comments)
-                  .WithOne(c => c.Card)
-                  .HasForeignKey(c => c.CardId);
-            entity.HasMany(e => e.Labels)
-                  .WithOne(cl => cl.Card)
-                  .HasForeignKey(cl => cl.CardId);
-            entity.HasOne(e => e.Owner)
-                  .WithMany(u => u.AssignedCards)
-                  .HasForeignKey(e => e.OwnerId)
-                  .OnDelete(DeleteBehavior.NoAction);
-            entity.HasOne(e => e.Team)
-                  .WithMany(t => t.Cards)
-                  .HasForeignKey(e => e.TeamId)
-                  .OnDelete(DeleteBehavior.NoAction);
-            entity.Property(e => e.IsActive).HasDefaultValue(true);
-        });
+        modelBuilder.ApplyConfiguration(new CardEntityConfiguration());
 
         modelBuilder.Entity<CardAttachment>(entity =>
         {
