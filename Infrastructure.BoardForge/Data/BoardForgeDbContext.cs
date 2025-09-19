@@ -28,20 +28,7 @@ public class BoardForgeDbContext : DbContext
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.ApplyConfiguration(new UserEntityConfiguration());
-
-        modelBuilder.Entity<RefreshToken>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.HasIndex(e => e.TokenHash).IsUnique();
-            entity.Property(e => e.TokenHash).HasMaxLength(256).IsRequired();
-            entity.Property(e => e.CreatedByIp).HasMaxLength(64);
-            entity.Property(e => e.UserAgent).HasMaxLength(512);
-            entity.Property(e => e.DeviceName).HasMaxLength(128);
-            entity.HasOne(e => e.User)
-                  .WithMany(u => u.RefreshTokens)
-                  .HasForeignKey(e => e.UserId)
-                  .OnDelete(DeleteBehavior.Cascade);
-        });
+        modelBuilder.ApplyConfiguration(new RefreshTokenEntityConfiguration());
 
         modelBuilder.Entity<Board>(entity =>
         {
