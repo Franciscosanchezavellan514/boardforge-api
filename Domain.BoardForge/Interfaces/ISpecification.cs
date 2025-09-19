@@ -12,6 +12,7 @@ public interface ISpecification<T>
     /// The related entities to include in the query.
     /// </summary>
     List<Expression<Func<T, object>>> Includes { get; }
+    IReadOnlyList<string> IncludeStrings { get; }
     /// <summary>
     /// The property to order the entities by in ascending order.
     /// </summary>
