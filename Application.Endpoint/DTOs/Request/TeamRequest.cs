@@ -11,3 +11,4 @@ public record AddTeamLabelRequest([Required] string Name, string? Color);
 public record UpdateTeamLabelRequest([Required] string Name, string? Color);
 public record RemoveTeamLabelRequest([Required] int LabelId);
 public record UpdateTeamResourceRequest<TData>(int TeamId, int ResourceId, int UserId, TData Data);
+public record DeleteTeamResourceRequest(int ResourceId, int TeamId, int UserId);
