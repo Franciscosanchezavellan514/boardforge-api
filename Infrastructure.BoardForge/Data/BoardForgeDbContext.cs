@@ -34,20 +34,7 @@ public class BoardForgeDbContext : DbContext
         modelBuilder.ApplyConfiguration(new CardEntityConfiguration());
         modelBuilder.ApplyConfiguration(new CardAttachmentEntityConfiguration());
         modelBuilder.ApplyConfiguration(new CardCommentEntityConfiguration());
-
-        modelBuilder.Entity<Label>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.HasMany(e => e.CardLabels)
-                  .WithOne(cl => cl.Label)
-                  .HasForeignKey(cl => cl.LabelId);
-            entity.HasOne(e => e.Team)
-                  .WithMany(t => t.Labels)
-                  .HasForeignKey(e => e.TeamId)
-                  .OnDelete(DeleteBehavior.Cascade);
-            entity.Property(e => e.IsActive).HasDefaultValue(true);
-            entity.HasIndex(e => new { e.TeamId, e.NormalizedName }).IsUnique();
-        });
+        modelBuilder.ApplyConfiguration(new CardEntityConfiguration());
 
         modelBuilder.Entity<CardLabel>(entity =>
         {
