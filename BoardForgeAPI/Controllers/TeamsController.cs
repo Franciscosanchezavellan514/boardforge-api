@@ -220,8 +220,8 @@ public class TeamsController(
         var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(teamId), ownerRequirement);
         if (!auth.Succeeded) throw new ForbiddenException();
 
-        var baseRequest = new BaseRequest<RemoveTeamLabelRequest>(teamId, CurrentUserId, new RemoveTeamLabelRequest(id));
-        await _labelsService.DeleteLabelAsync(baseRequest);
+        var deleteRequest = new DeleteTeamResourceRequest(id, teamId, CurrentUserId);
+        await _labelsService.DeleteLabelAsync(deleteRequest);
         return NoContent();
     }
 

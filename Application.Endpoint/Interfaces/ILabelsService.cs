@@ -8,5 +8,5 @@ public interface ILabelsService
     Task<TeamLabelOperationResponse> AddLabels(BaseRequest<IEnumerable<AddTeamLabelRequest>> request);
     Task<IEnumerable<TeamLabelResponse>> GetLabelsAsync(int teamId);
     Task<TeamLabelResponse> UpdateLabelAsync(BaseRequest<KeyValuePair<int, UpdateTeamLabelRequest>> request);
-    Task DeleteLabelAsync(BaseRequest<RemoveTeamLabelRequest> request);
+    Task DeleteLabelAsync(DeleteTeamResourceRequest request);
 }

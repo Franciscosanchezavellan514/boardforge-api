@@ -120,15 +120,15 @@ public class LabelsService(IUnitOfWork unitOfWork, TimeProvider timeProvider, IS
             );
     }
 
-    public async Task DeleteLabelAsync(BaseRequest<RemoveTeamLabelRequest> request)
+    public async Task DeleteLabelAsync(DeleteTeamResourceRequest request)
     {
-        if (request.ObjectId <= 0) throw new ArgumentException("Invalid ObjectId");
-        if (!await _unitOfWork.Teams.ExistsAsync(request.ObjectId))
-            throw new KeyNotFoundException($"Team with ID {request.ObjectId} not found");
+        if (request.TeamId <= 0) throw new ArgumentException("Invalid TeamId");
+        if (!await _unitOfWork.Teams.ExistsAsync(request.TeamId))
+            throw new KeyNotFoundException($"Team with ID {request.TeamId} not found");
 
-        var labelByIdAndTeamSpec = new GetLabelByIdAndTeamSpecification(request.Data.LabelId, request.ObjectId);
+        var labelByIdAndTeamSpec = new GetLabelByIdAndTeamSpecification(request.ResourceId, request.TeamId);
         Label? existingLabel = await _unitOfWork.Labels.GetFirstAsync(labelByIdAndTeamSpec);
-        if (existingLabel is null) throw new KeyNotFoundException($"Label with ID: {request.Data.LabelId} not found");
+        if (existingLabel is null) throw new KeyNotFoundException($"Label with ID: {request.ResourceId} not found");
 
         // Soft delete if label is associated with any cards
         if (existingLabel.CardLabels.Any())
