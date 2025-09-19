@@ -6,7 +6,6 @@ using DevStack.BoardForgeAPI.Authorization;
 using DevStack.BoardForgeAPI.Exceptions;
 using DevStack.BoardForgeAPI.Models;
 using DevStack.Domain.BoardForge.Entities;
-using DevStack.Domain.BoardForge.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,14 +21,12 @@ public class TeamsController(
     ILabelsService labelsService,
     IAuthorizationService authorizationService,
     ICardsService cardsService,
-    ICardQueries cardQueries,
-    IEtagService etagService) : BaseApiController
+    ICardQueries cardQueries) : BaseApiController
 {
     private readonly ITeamsService _teamsService = teamsService;
     private readonly ILabelsService _labelsService = labelsService;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly ICardsService _cardsService = cardsService;
-    private readonly IEtagService _etagService = etagService;
     private readonly ICardQueries _cardQueries = cardQueries;
 
     /// <summary>
