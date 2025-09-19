@@ -29,7 +29,7 @@ public class CardQueries(BoardForgeDbContext dbContext, IEtagService etagService
                 c.UpdatedAt,
                 c.CreatedBy,
                 c.UpdatedBy,
-                Labels = c.Labels.Where(cl => cl.Label!.IsActive).Select(cl => new { cl.Label!.Id, cl.Label.Name }).ToList()
+                Labels = c.Labels.Where(cl => cl.Label!.IsActive).Select(cl => new { cl.Label!.Id, cl.Label.Name, cl.Label.ColorHex }).ToList()
             })
             .AsSplitQuery()
             .ToListAsync();
@@ -37,7 +37,7 @@ public class CardQueries(BoardForgeDbContext dbContext, IEtagService etagService
         return cards.Select(c =>
         {
             var etag = etagService.FromRowVersion(c.RowVersion);
-            var labels = c.Labels.Select(l => new LookupItem(l.Id, l.Name));
+            var labels = c.Labels.Select(l => new CardLabelResponse(l.Id, l.Name, l.ColorHex));
             return new CardResponse(
                 c.Id,
                 c.Title,
