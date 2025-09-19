@@ -77,7 +77,7 @@ public class CardsService(IUnitOfWork unitOfWork, IEtagService etagService, Time
             card.UpdatedAt,
             card.CreatedBy,
             card.UpdatedBy,
-            card.Labels?.Select(cl => new LookupItem(cl.Label!.Id, cl.Label.Name)) ?? []
+            card.Labels?.Select(cl => new CardLabelResponse(cl.Label!.Id, cl.Label.Name, cl.Label.ColorHex)) ?? []
         );
     }
 
@@ -150,13 +150,13 @@ public class CardsService(IUnitOfWork unitOfWork, IEtagService etagService, Time
         await _unitOfWork.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<LookupItem>> GetLabelsAsync(int id)
+    public async Task<IEnumerable<CardLabelResponse>> GetLabelsAsync(int id)
     {
         bool cardExists = await _unitOfWork.Cards.ExistsAsync(id);
         if (!cardExists) throw new KeyNotFoundException($"Card with ID {id} not found.");
 
-        var labels = await _unitOfWork.CardLabels.ListAsync(new CardLabelsByCardIdSpecification(id));
-        return labels.Select(cl => new LookupItem(cl.Label!.Id, cl.Label.Name));
+        var labels = await _unitOfWork.CardLabels.ListAsync(new CardLabelsByCardIdSpecification(id, true));
+        return labels.Select(cl => new CardLabelResponse(cl.Label!.Id, cl.Label.Name, cl.Label.ColorHex));
     }
 
     public async Task AddLabelsAsync(int id, AddCardLabelsRequest request)
