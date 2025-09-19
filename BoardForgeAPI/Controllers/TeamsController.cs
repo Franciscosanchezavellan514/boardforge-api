@@ -1,4 +1,5 @@
-﻿using DevStack.Application.BoardForge.DTOs.Request;
+﻿using DevStack.Application.BoardForge.DTOs;
+using DevStack.Application.BoardForge.DTOs.Request;
 using DevStack.Application.BoardForge.DTOs.Response;
 using DevStack.Application.BoardForge.Interfaces;
 using DevStack.Application.BoardForge.Interfaces.Queries;
