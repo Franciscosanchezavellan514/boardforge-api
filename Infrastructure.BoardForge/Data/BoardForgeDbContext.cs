@@ -34,7 +34,7 @@ public class BoardForgeDbContext : DbContext
         modelBuilder.ApplyConfiguration(new CardEntityConfiguration());
         modelBuilder.ApplyConfiguration(new CardAttachmentEntityConfiguration());
         modelBuilder.ApplyConfiguration(new CardCommentEntityConfiguration());
-        modelBuilder.ApplyConfiguration(new CardEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new LabelEntityConfiguration());
 
         modelBuilder.Entity<CardLabel>(entity =>
         {
