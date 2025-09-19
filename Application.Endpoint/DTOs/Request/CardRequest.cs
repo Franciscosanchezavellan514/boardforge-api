@@ -17,3 +17,5 @@ public record UpdateCardRequest(
     int? BoardId,
     int? OwnerId
 );
+
+public record AddCardLabelsRequest(IEnumerable<int> LabelIds);

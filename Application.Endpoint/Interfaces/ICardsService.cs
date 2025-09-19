@@ -10,4 +10,7 @@ public interface ICardsService
     Task<CardResponse> GetAsync(int id);
     Task<CardResponse> UpdateAsync(UpdateTeamResourceRequest<UpdateCardRequest> request, string etag);
     Task SoftDeleteAsync(DeleteTeamResourceRequest request);
+    Task<IEnumerable<LookupItem>> GetLabelsAsync(int id);
+    Task AddLabelsAsync(int id, AddCardLabelsRequest request);
+    Task RemoveLabelAsync(int id, int labelId);
 }

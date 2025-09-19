@@ -149,4 +149,35 @@ public class CardsService(IUnitOfWork unitOfWork, IEtagService etagService, Time
         card.DeletedBy = request.UserId;
         await _unitOfWork.SaveChangesAsync();
     }
+
+    public async Task<IEnumerable<LookupItem>> GetLabelsAsync(int id)
+    {
+        bool cardExists = await _unitOfWork.Cards.ExistsAsync(id);
+        if (!cardExists) throw new KeyNotFoundException($"Card with ID {id} not found.");
+
+        var labels = await _unitOfWork.CardLabels.ListAsync(new CardLabelsByCardIdSpecification(id));
+        return labels.Select(cl => new LookupItem(cl.Label!.Id, cl.Label.Name));
+    }
+
+    public async Task AddLabelsAsync(int id, AddCardLabelsRequest request)
+    {
+        bool cardExists = await _unitOfWork.Cards.ExistsAsync(id);
+        if (!cardExists) throw new KeyNotFoundException($"Card with ID {id} not found.");
+
+        var labels = request.LabelIds.Select(labelId => new CardLabel { CardId = id, LabelId = labelId, IsActive = true });
+        await _unitOfWork.CardLabels.AddAsync(labels);
+        await _unitOfWork.SaveChangesAsync();
+    }
+
+    public async Task RemoveLabelAsync(int id, int labelId)
+    {
+        bool cardExists = await _unitOfWork.Cards.ExistsAsync(id);
+        if (!cardExists) throw new KeyNotFoundException($"Card with ID {id} not found.");
+
+        var label = await _unitOfWork.CardLabels.GetByIdAsync(labelId);
+        if (label == null) throw new KeyNotFoundException($"Label with ID {labelId} not found.");
+
+        await _unitOfWork.CardLabels.DeleteAsync(label);
+        await _unitOfWork.SaveChangesAsync();
+    }
 }
