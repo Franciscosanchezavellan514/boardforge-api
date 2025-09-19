@@ -73,7 +73,7 @@ public class CardsController(
         var authorizationResult = await _authorizationService.AuthorizeAsync(User, resource, memberRequirement);
         if (!authorizationResult.Succeeded) throw new ForbiddenException();
 
-        await _cardsService.AddLabelsAsync(id, request);
+        await _cardsService.AddLabelsAsync(id, resource.TeamId, request);
         return NoContent();
     }
 
