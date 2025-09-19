@@ -33,20 +33,7 @@ public class BoardForgeDbContext : DbContext
         modelBuilder.ApplyConfiguration(new BoardColumnEntityConfiguration());
         modelBuilder.ApplyConfiguration(new CardEntityConfiguration());
         modelBuilder.ApplyConfiguration(new CardAttachmentEntityConfiguration());
-
-        modelBuilder.Entity<CardComment>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.HasOne(e => e.Card)
-                  .WithMany(c => c.Comments)
-                  .HasForeignKey(e => e.CardId)
-                  .OnDelete(DeleteBehavior.Cascade);
-            entity.HasOne(e => e.Author)
-                  .WithMany(u => u.Comments)
-                  .HasForeignKey(e => e.AuthorId)
-                  .OnDelete(DeleteBehavior.NoAction);
-            entity.Property(e => e.IsActive).HasDefaultValue(true);
-        });
+        modelBuilder.ApplyConfiguration(new CardCommentEntityConfiguration());
 
         modelBuilder.Entity<Label>(entity =>
         {
