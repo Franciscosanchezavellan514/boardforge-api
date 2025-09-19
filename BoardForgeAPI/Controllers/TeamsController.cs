@@ -266,7 +266,7 @@ public class TeamsController(
     }
 
     [HttpPatch("{teamId:int}/cards/{id:int}")]
-    [ProducesResponseType<CardResponse>(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<CardResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status404NotFound)]
@@ -283,8 +283,8 @@ public class TeamsController(
         }
 
         var updateRequest = new UpdateTeamResourceRequest<UpdateCardRequest>(teamId, id, CurrentUserId, request);
-        await _cardsService.UpdateAsync(updateRequest, ifMatch);
-        return NoContent();
+        var updatedCard = await _cardsService.UpdateAsync(updateRequest, ifMatch);
+        return Ok(updatedCard);
     }
 
     [HttpDelete("{teamId:int}/cards/{id:int}")]
