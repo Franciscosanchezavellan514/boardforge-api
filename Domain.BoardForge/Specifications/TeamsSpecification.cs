@@ -60,6 +60,14 @@ public sealed class GetLabelsByTeamSpecification : BaseSpecification<Label>
     }
 }
 
+public sealed class GetLabelsByIdsAndTeamSpecification : BaseSpecification<Label>
+{
+    public GetLabelsByIdsAndTeamSpecification(int teamId, IEnumerable<int> labelIds)
+    {
+        ApplyCriteria(c => c.TeamId.Equals(teamId) && labelIds.Contains(c.Id) && c.IsActive);
+    }
+}
+
 public sealed class GetLabelByIdAndTeamSpecification : BaseSpecification<Label>
 {
     public GetLabelByIdAndTeamSpecification(int id, int teamId)
