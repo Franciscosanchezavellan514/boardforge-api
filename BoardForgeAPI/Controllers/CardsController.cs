@@ -42,7 +42,7 @@ public class CardsController(
     }
 
     [HttpGet("{id:int}/labels")]
-    [ProducesResponseType<IEnumerable<LookupItem>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<IEnumerable<CardLabelResponse>>(StatusCodes.Status200OK)]
     [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetCardLabelsAsync(int id)
@@ -55,7 +55,7 @@ public class CardsController(
         var authorizationResult = await _authorizationService.AuthorizeAsync(User, resource, viewerRequirement);
         if (!authorizationResult.Succeeded) throw new ForbiddenException();
 
-        IEnumerable<LookupItem> labels = await _cardsService.GetLabelsAsync(id);
+        IEnumerable<CardLabelResponse> labels = await _cardsService.GetLabelsAsync(id);
         return Ok(labels);
     }
 
