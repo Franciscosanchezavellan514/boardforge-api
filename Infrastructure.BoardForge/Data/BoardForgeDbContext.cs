@@ -36,25 +36,7 @@ public class BoardForgeDbContext : DbContext
         modelBuilder.ApplyConfiguration(new CardCommentEntityConfiguration());
         modelBuilder.ApplyConfiguration(new LabelEntityConfiguration());
         modelBuilder.ApplyConfiguration(new CardLabelEntityConfiguration());
-
-        modelBuilder.Entity<Team>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).UseIdentityColumn(seed: 1000, increment: 1);
-            entity.HasMany(e => e.Boards)
-                  .WithOne(b => b.Team)
-                  .HasForeignKey(b => b.TeamId);
-            entity.HasMany(e => e.TeamMemberships)
-                  .WithOne(tm => tm.Team)
-                  .HasForeignKey(tm => tm.TeamId);
-            entity.HasMany(e => e.Labels)
-                  .WithOne(l => l.Team)
-                  .HasForeignKey(l => l.TeamId);
-            entity.HasMany(e => e.Cards)
-                  .WithOne(c => c.Team)
-                  .HasForeignKey(e => e.TeamId);
-            entity.Property(e => e.IsActive).HasDefaultValue(true);
-        });
+        modelBuilder.ApplyConfiguration(new TeamEntityConfiguration());
 
         modelBuilder.Entity<TeamMembership>(entity =>
         {
