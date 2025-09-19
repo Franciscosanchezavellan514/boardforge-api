@@ -273,6 +273,7 @@ public class TeamsController(
     [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status412PreconditionFailed)]
     public async Task<IActionResult> UpdateCardAsync(int teamId, int id, [FromBody] UpdateCardRequest request, [FromHeader(Name = "If-Match")] string ifMatch)
     {
         var writeRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Member);
