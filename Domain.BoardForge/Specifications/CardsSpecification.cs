@@ -18,7 +18,16 @@ public class CardByIdAndTeamIdSpecification : BaseSpecification<Card>
     public CardByIdAndTeamIdSpecification(int id, int teamId)
     {
         ApplyCriteria(c => c.Id == id && c.TeamId == teamId);
-        AddInclude(i => i.Labels);
+        AddInclude($"{nameof(Card.Labels)}.{nameof(CardLabel.Label)}");
+    }
+}
+
+public class CardByIdSpecification : BaseSpecification<Card>
+{
+    public CardByIdSpecification(int id)
+    {
+        ApplyCriteria(c => c.Id == id);
+        AddInclude($"{nameof(Card.Labels)}.{nameof(CardLabel.Label)}");
     }
 }
 
