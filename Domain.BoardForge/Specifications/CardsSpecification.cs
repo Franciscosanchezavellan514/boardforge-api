@@ -33,3 +33,11 @@ public class CardLabelsByCardIdSpecification : BaseSpecification<CardLabel>
         }
     }
 }
+
+public class CardLabelByCardAndLabelIdSpecification : BaseSpecification<CardLabel>
+{
+    public CardLabelByCardAndLabelIdSpecification(int cardId, int labelId)
+    {
+        ApplyCriteria(cl => cl.CardId == cardId && cl.LabelId == labelId);
+    }
+}
