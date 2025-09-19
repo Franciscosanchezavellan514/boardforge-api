@@ -25,3 +25,16 @@ public class EntityConcurrencyConflictException<TEntity> : Exception where TEnti
         Entity = entity;
     }
 }
+
+public class EntityConcurrencyConflictException : Exception
+{
+    private static readonly string DefaultMessage = "Concurrency conflict occurred. The entity may have been modified or deleted by another process.";
+
+    public EntityConcurrencyConflictException() : base(DefaultMessage)
+    {
+    }
+
+    public EntityConcurrencyConflictException(string message) : base(message)
+    {
+    }
+}

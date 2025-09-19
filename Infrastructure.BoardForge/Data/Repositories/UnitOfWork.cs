@@ -1,5 +1,7 @@
 using DevStack.Domain.BoardForge.Entities;
+using DevStack.Domain.BoardForge.Exceptions;
 using DevStack.Domain.BoardForge.Interfaces.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace DevStack.Infrastructure.BoardForge.Data.Repositories;
 
@@ -29,12 +31,26 @@ public class UnitOfWork : IUnitOfWork
 
     public async Task<int> SaveChangesAsync()
     {
-        return await _dbContext.SaveChangesAsync();
+        try
+        {
+            return await _dbContext.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new EntityConcurrencyConflictException();
+        }
     }
 
-    public Task<int> SaveChangesAsync(CancellationToken cancellationToken)
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
-        return _dbContext.SaveChangesAsync(cancellationToken);
+        try
+        {
+            return await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new EntityConcurrencyConflictException();
+        }
     }
 
     public void Dispose()
