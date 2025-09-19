@@ -1,4 +1,5 @@
 using DevStack.Domain.BoardForge.Entities;
+using DevStack.Infrastructure.BoardForge.Data.EntityConfigurations;
 using Microsoft.EntityFrameworkCore;
 
 namespace DevStack.Infrastructure.BoardForge.Data;
@@ -26,14 +27,7 @@ public class BoardForgeDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<User>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).UseIdentityColumn(seed: 1000, increment: 1);
-            // Ensure email is unique to prevent duplicate user accounts and support user identification.
-            entity.HasIndex(e => e.Email).IsUnique();
-            entity.Property(e => e.IsActive).HasDefaultValue(true);
-        });
+        modelBuilder.ApplyConfiguration(new UserEntityConfiguration());
 
         modelBuilder.Entity<RefreshToken>(entity =>
         {
