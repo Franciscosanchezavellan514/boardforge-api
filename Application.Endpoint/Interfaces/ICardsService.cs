@@ -9,4 +9,5 @@ public interface ICardsService
     Task<CardResponse> GetAsync(int teamId, int cardId);
     Task<CardResponse> GetAsync(int id);
     Task<CardResponse> UpdateAsync(UpdateTeamResourceRequest<UpdateCardRequest> request, string etag);
+    Task SoftDeleteAsync(DeleteTeamResourceRequest request);
 }

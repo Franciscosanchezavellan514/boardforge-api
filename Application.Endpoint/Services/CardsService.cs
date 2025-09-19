@@ -135,4 +135,18 @@ public class CardsService(IUnitOfWork unitOfWork, IEtagService etagService, Time
         card.UpdatedBy = request.UserId;
         card.UpdatedAt = _timeProvider.GetUtcNow().UtcDateTime;
     }
+
+    public async Task SoftDeleteAsync(DeleteTeamResourceRequest request)
+    {
+        bool teamExists = await _unitOfWork.Teams.ExistsAsync(request.TeamId);
+        if (!teamExists) throw new KeyNotFoundException($"Team with ID {request.TeamId} not found.");
+
+        Card? card = await _unitOfWork.Cards.GetFirstAsync(new CardByIdAndTeamIdSpecification(request.ResourceId, request.TeamId));
+        if (card == null) throw new KeyNotFoundException($"Card with ID {request.ResourceId} not found in team {request.TeamId}.");
+
+        card.IsActive = false;
+        card.DeletedAt = _timeProvider.GetUtcNow().UtcDateTime;
+        card.DeletedBy = request.UserId;
+        await _unitOfWork.SaveChangesAsync();
+    }
 }

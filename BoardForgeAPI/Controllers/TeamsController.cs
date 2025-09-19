@@ -268,12 +268,12 @@ public class TeamsController(
         return CreatedAtAction(nameof(GetCardAsync), new { teamId, id = card.Id }, card);
     }
 
-    [HttpPatch("{teamId:int}/cards/{cardId:int}")]
+    [HttpPatch("{teamId:int}/cards/{id:int}")]
     [ProducesResponseType<CardResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateCardAsync(int teamId, int cardId, [FromBody] UpdateCardRequest request)
+    public async Task<IActionResult> UpdateCardAsync(int teamId, int id, [FromBody] UpdateCardRequest request)
     {
         var writeRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Member);
         var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(teamId), writeRequirement);
@@ -284,8 +284,23 @@ public class TeamsController(
             throw new BadHttpRequestException("Missing If-Match header");
         }
 
-        var updateRequest = new UpdateTeamResourceRequest<UpdateCardRequest>(teamId, cardId, CurrentUserId, request);
+        var updateRequest = new UpdateTeamResourceRequest<UpdateCardRequest>(teamId, id, CurrentUserId, request);
         await _cardsService.UpdateAsync(updateRequest, etag.ToString());
+        return NoContent();
+    }
+
+    [HttpDelete("{teamId:int}/cards/{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteCardAsync(int teamId, int id)
+    {
+        var writeRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Member);
+        var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(teamId), writeRequirement);
+        if (!auth.Succeeded) throw new ForbiddenException();
+
+        var deleteRequest = new DeleteTeamResourceRequest(id, teamId, CurrentUserId);
+        await _cardsService.SoftDeleteAsync(deleteRequest);
         return NoContent();
     }
 }
