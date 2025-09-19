@@ -29,23 +29,7 @@ public class BoardForgeDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new UserEntityConfiguration());
         modelBuilder.ApplyConfiguration(new RefreshTokenEntityConfiguration());
-
-        modelBuilder.Entity<Board>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).UseIdentityColumn(seed: 1000, increment: 1);
-            entity.HasMany(e => e.Columns)
-                  .WithOne(c => c.Board)
-                  .HasForeignKey(c => c.BoardId);
-            entity.HasMany(e => e.Cards)
-                  .WithOne(c => c.Board)
-                  .HasForeignKey(c => c.BoardId);
-            entity.HasOne(e => e.Team)
-                  .WithMany(t => t.Boards)
-                  .HasForeignKey(e => e.TeamId)
-                  .OnDelete(DeleteBehavior.NoAction);
-            entity.Property(e => e.IsActive).HasDefaultValue(true);
-        });
+        modelBuilder.ApplyConfiguration(new BoardEntityConfiguration());
 
         modelBuilder.Entity<BoardColumn>(entity =>
         {
