@@ -30,6 +30,7 @@ public class CardsService(IUnitOfWork unitOfWork, IEtagService etagService, Time
             TeamId = request.ObjectId,
             CreatedBy = request.UserId,
             CreatedAt = _timeProvider.GetUtcNow().UtcDateTime,
+            IsActive = true
         };
 
         await _unitOfWork.Cards.AddAsync(card);
