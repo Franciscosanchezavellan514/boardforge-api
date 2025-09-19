@@ -159,13 +159,18 @@ public class CardsService(IUnitOfWork unitOfWork, IEtagService etagService, Time
         return labels.Select(cl => new CardLabelResponse(cl.Label!.Id, cl.Label.Name, cl.Label.ColorHex));
     }
 
-    public async Task AddLabelsAsync(int id, AddCardLabelsRequest request)
+    public async Task AddLabelsAsync(int id, int teamId, AddCardLabelsRequest request)
     {
         bool cardExists = await _unitOfWork.Cards.ExistsAsync(id);
         if (!cardExists) throw new KeyNotFoundException($"Card with ID {id} not found.");
 
-        var labels = request.LabelIds.Select(labelId => new CardLabel { CardId = id, LabelId = labelId, IsActive = true });
-        await _unitOfWork.CardLabels.AddAsync(labels);
+        var uniqueLabelIds = request.LabelIds.Distinct().ToList();
+        var labels = await _unitOfWork.Labels.ListAsync(new GetLabelsByIdsAndTeamSpecification(teamId, uniqueLabelIds));
+        if (labels.Count() != uniqueLabelIds.Count()) throw new KeyNotFoundException("One or more labels not found in the specified team.");
+        if (!labels.Any()) return;
+
+        var cardLabels = labels.Select(label => new CardLabel { CardId = id, LabelId = label.Id });
+        await _unitOfWork.CardLabels.AddAsync(cardLabels);
         await _unitOfWork.SaveChangesAsync();
     }
 
@@ -174,7 +179,7 @@ public class CardsService(IUnitOfWork unitOfWork, IEtagService etagService, Time
         bool cardExists = await _unitOfWork.Cards.ExistsAsync(id);
         if (!cardExists) throw new KeyNotFoundException($"Card with ID {id} not found.");
 
-        var label = await _unitOfWork.CardLabels.GetByIdAsync(labelId);
+        var label = await _unitOfWork.CardLabels.GetFirstAsync(new CardLabelByCardAndLabelIdSpecification(id, labelId));
         if (label == null) throw new KeyNotFoundException($"Label with ID {labelId} not found.");
 
         await _unitOfWork.CardLabels.DeleteAsync(label);
