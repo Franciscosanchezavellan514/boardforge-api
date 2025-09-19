@@ -1,3 +1,4 @@
+using DevStack.Application.BoardForge.DTOs;
 using DevStack.Application.BoardForge.Interfaces;
 using DevStack.Domain.BoardForge.Entities;
 using DevStack.Infrastructure.BoardForge.Data;
@@ -10,6 +11,14 @@ public class TeamAuthorizationService(BoardForgeDbContext dbContext, IMemoryCach
 {
     private readonly BoardForgeDbContext _dbContext = dbContext;
     private readonly IMemoryCache _cache = memoryCache;
+
+    public async Task<TeamResource?> GetTeamResourceAsync<TEntity>(int resourceId) where TEntity : BaseEntity, ITeamResource
+    {
+        return await _dbContext.Set<TEntity>()
+            .Where(e => e.Id == resourceId)
+            .Select(e => new TeamResource(e.TeamId))
+            .FirstOrDefaultAsync();
+    }
 
     public async Task<TeamMembershipRole.Role?> GetUserRoleAsync(int userId, int teamId)
     {
