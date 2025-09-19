@@ -30,19 +30,7 @@ public class BoardForgeDbContext : DbContext
         modelBuilder.ApplyConfiguration(new UserEntityConfiguration());
         modelBuilder.ApplyConfiguration(new RefreshTokenEntityConfiguration());
         modelBuilder.ApplyConfiguration(new BoardEntityConfiguration());
-
-        modelBuilder.Entity<BoardColumn>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).UseIdentityColumn(seed: 1000, increment: 1);
-            entity.HasOne(e => e.Board)
-                  .WithMany(b => b.Columns)
-                  .HasForeignKey(e => e.BoardId);
-            entity.HasMany(e => e.Cards)
-                  .WithOne(c => c.BoardColumn)
-                  .HasForeignKey(c => c.BoardColumnId);
-            entity.Property(e => e.IsActive).HasDefaultValue(true);
-        });
+        modelBuilder.ApplyConfiguration(new BoardColumnEntityConfiguration());
 
         modelBuilder.Entity<Card>(entity =>
         {
