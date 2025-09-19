@@ -44,7 +44,7 @@ public class TeamsController(
         return Ok(teams);
     }
 
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:int}", Name = "GetTeamById")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TeamResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(HttpErrorResponse))]
     public async Task<IActionResult> GetAsync(int id)
@@ -60,7 +60,7 @@ public class TeamsController(
     {
         var baseRequest = new CreateRequest<CreateTeamRequest>(CurrentUserId, request);
         var team = await _teamsService.CreateAsync(baseRequest);
-        return CreatedAtAction(nameof(GetAsync), new { id = team.Id }, team);
+        return CreatedAtRoute("GetTeamById", new { id = team.Id }, team);
     }
 
     [HttpPut("{id:int}")]
@@ -239,7 +239,7 @@ public class TeamsController(
         return Ok(cards);
     }
 
-    [HttpGet("{teamId:int}/cards/{id:int}")]
+    [HttpGet("{teamId:int}/cards/{id:int}", Name = "GetTeamCardById")]
     [ProducesResponseType<CardResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status404NotFound)]
@@ -265,27 +265,27 @@ public class TeamsController(
 
         var baseRequest = new BaseRequest<CreateCardRequest>(teamId, CurrentUserId, request);
         CardResponse card = await _cardsService.CreateAsync(baseRequest);
-        return CreatedAtAction(nameof(GetCardAsync), new { teamId, id = card.Id }, card);
+        return CreatedAtRoute("GetTeamCardById", new { teamId, id = card.Id }, card);
     }
 
     [HttpPatch("{teamId:int}/cards/{id:int}")]
-    [ProducesResponseType<CardResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<CardResponse>(StatusCodes.Status204NoContent)]
     [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<HttpErrorResponse>(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateCardAsync(int teamId, int id, [FromBody] UpdateCardRequest request)
+    public async Task<IActionResult> UpdateCardAsync(int teamId, int id, [FromBody] UpdateCardRequest request, [FromHeader(Name = "If-Match")] string ifMatch)
     {
         var writeRequirement = new TeamRoleRequirement(TeamMembershipRole.Role.Member);
         var auth = await _authorizationService.AuthorizeAsync(User, new TeamResource(teamId), writeRequirement);
         if (!auth.Succeeded) throw new ForbiddenException();
 
-        if (!Request.Headers.TryGetValue("If-Match", out var etag))
+        if (string.IsNullOrWhiteSpace(ifMatch))
         {
             throw new BadHttpRequestException("Missing If-Match header");
         }
 
         var updateRequest = new UpdateTeamResourceRequest<UpdateCardRequest>(teamId, id, CurrentUserId, request);
-        await _cardsService.UpdateAsync(updateRequest, etag.ToString());
+        await _cardsService.UpdateAsync(updateRequest, ifMatch);
         return NoContent();
     }
 
