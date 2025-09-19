@@ -1,9 +1,9 @@
 using DevStack.Application.BoardForge.DTOs.Response;
+using DevStack.Application.BoardForge.Interfaces.Queries;
 using DevStack.Domain.BoardForge.Interfaces.Services;
-using DevStack.Infrastructure.BoardForge.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace DevStack.Application.BoardForge.Interfaces.Queries;
+namespace DevStack.Infrastructure.BoardForge.Data.Queries;
 
 public class CardQueries(BoardForgeDbContext dbContext, IEtagService etagService) : ICardQueries
 {

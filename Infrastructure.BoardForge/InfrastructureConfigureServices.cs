@@ -10,6 +10,7 @@ using DevStack.Domain.BoardForge.Interfaces.Repositories;
 using DevStack.Domain.BoardForge.Interfaces.Services;
 using DevStack.Infrastructure.BoardForge.Data.Repositories;
 using DevStack.Application.BoardForge.Interfaces.Queries;
+using DevStack.Infrastructure.BoardForge.Data.Queries;
 
 namespace DevStack.Infrastructure.BoardForge;
 
