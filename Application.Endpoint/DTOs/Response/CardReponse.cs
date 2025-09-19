@@ -1,5 +1,7 @@
 namespace DevStack.Application.BoardForge.DTOs.Response;
 
+public record CardLabelResponse(int Id, string Name, string color);
+
 public record CardResponse(
     int Id,
     string Title,
@@ -15,5 +17,5 @@ public record CardResponse(
     DateTime? UpdatedAt,
     int CreatedBy,
     int? UpdatedBy,
-    IEnumerable<LookupItem> Labels
+    IEnumerable<CardLabelResponse> Labels
 );
