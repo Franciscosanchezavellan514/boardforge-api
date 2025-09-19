@@ -52,7 +52,7 @@ public class CardsService(IUnitOfWork unitOfWork, IEtagService etagService, Time
 
     public async Task<CardResponse> GetAsync(int id)
     {
-        Card? card = await _unitOfWork.Cards.GetByIdAsync(id);
+        Card? card = await _unitOfWork.Cards.GetFirstAsync(new CardByIdSpecification(id));
         if (card == null) throw new KeyNotFoundException($"Card with ID {id} not found.");
 
         return MapEntityToCardResponse(card);
